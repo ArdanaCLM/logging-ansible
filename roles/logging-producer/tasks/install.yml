@@ -56,8 +56,8 @@
     path: /var/log/beaver
     state: directory
     owner: "{{ beaver_user }}"
-    group: "{{ beaver_group }}"
-    mode: 0750
+    group: adm
+    mode: 0755
   register: ardana_notify_beaver_restart
 
 - name: logging-producer | install | Install Beaver conf directory

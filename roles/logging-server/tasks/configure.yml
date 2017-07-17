@@ -178,6 +178,25 @@
     mode: 0640
     state: touch
 
+- name: logging-server | configure | Create Kibana error log file
+  become: yes
+  file:
+    path: "{{ kibana_log_path }}/kibana_error.log"
+    owner: kibana
+    group: adm
+    mode: 0640
+    state: touch
+
+
+- name: logging-server | configure | Create Kibana access log file
+  become: yes
+  file:
+    path: "{{ kibana_log_path }}/kibana_access.log"
+    owner: kibana
+    group: adm
+    mode: 0640
+    state: touch
+
 # Configure Curator
 #------------------------------------------------------------------------------
 - name: logging-server | configure | Fix Curator dependency issue

@@ -168,8 +168,8 @@
   file:
     path: "{{ kronos_log_dir }}"
     state: directory
-    owner: root
-    group: root
+    owner: "{{ kronos_user }}"
+    group: "{{ kronos_group }}"
     mode: 0755
 
 - name: kronos-logrotation | configure | Configure log file ownership

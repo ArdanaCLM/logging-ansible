@@ -32,7 +32,7 @@ sub_service:
       - copytruncate
       - maxsize 45M
       - rotate 7
-      - create 640 kibana kibana
+      - create 640 kibana adm
     - files:
       - /var/log/kibana/kibana_error.log
       - /var/log/kibana/kibana_access.log
@@ -46,4 +46,4 @@ sub_service:
       - copytruncate
       - maxsize 45M
       - rotate 7
-      - create 640 root root
+      - create 640 kibana adm

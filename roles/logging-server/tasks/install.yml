@@ -18,6 +18,14 @@
 
 # Install Kronos server stack misc.
 #------------------------------------------------------------------------------
+- name: logging-producer | install | Create Kronos user
+  become: yes
+  user:
+    name: "{{ kronos_user }}"
+    group: "{{ kronos_group }}"
+    shell: /usr/sbin/nologin
+    createhome: no
+
 - name: logging-server | install | Install hLinux packages
   become: yes
   apt:
@@ -48,8 +56,8 @@
   file:
     path: "{{ var_kronos_dir }}"
     state: directory
-    owner: root
-    group: root
+    owner: "{{ kronos_user }}"
+    group: adm
     mode: 0755
 
 - name: logging-server | install | Update venv package cache
@@ -235,8 +243,8 @@
     path: "{{ kibana_log_path }}"
     state: directory
     owner: kibana
-    group: kibana
-    mode: 0750
+    group: adm
+    mode: 0755
 
 # Install systemd service units
 #------------------------------------------------------------------------------
