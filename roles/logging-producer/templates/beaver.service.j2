@@ -40,7 +40,8 @@ ExecStartPre=/bin/chmod -R 0640 /var/log/beaver
 # Make sure files created in this folder have Beaver's group
 ExecStartPre=/bin/chmod g+s /var/log/beaver
 ExecStartPre=/bin/chmod 0750 /var/log/beaver
-ExecStart={{ beaver_bin_dir }}/beaver -c $CONF -C $CONFD -l $LOGFILE
+# Impossible to disable Beaver's internal log rotation, so set it to happen only when log files exceed 10TB
+ExecStart={{ beaver_bin_dir }}/beaver -c $CONF -C $CONFD -l $LOGFILE --max-bytes 10995116277760
 
 [Install]
 WantedBy=multi-user.target
