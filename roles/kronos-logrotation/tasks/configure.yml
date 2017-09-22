@@ -1,0 +1,185 @@
+#
+# (c) Copyright 2016,2017 Hewlett Packard Enterprise Development LP
+# (c) Copyright 2017 SUSE LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+---
+
+# Install Logging Dependencies
+#------------------------------------------------------------------------------
+- name: logging-producer | install | Install logging dependencies (Debian)
+  become: yes
+  apt:
+    name: python-yaml
+    state: latest
+  when: ansible_os_family == "Debian"
+
+- name: logging-producer | install | Install logging dependencies (RHEL)
+  become: yes
+  yum:
+    name: python-yaml
+    state: latest
+  when: ansible_os_family == "RedHat"
+
+- name: logging-producer | install | Install logging dependencies SUSE
+  become: yes
+  zypper:
+    name: python-yaml
+    state: latest
+  when: ansible_os_family == "Suse"
+
+# Configure logging for the implicated services
+#------------------------------------------------------------------------------
+- name: kronos-logrotation | configure | Load logging profiles
+  local_action: kronos_load_profiles
+  args:
+    host: "{{ inventory_hostname }}"
+    hosts: "{{ verb_hosts }}"
+    groups: "{{ groups }}"
+  register: logging_profiles
+
+- name: kronos-logrotation | configure | Configure logging for service
+  become: yes
+  kronos_process_profiles:
+    profiles: "{{ logging_profiles.result }}"
+    control_plane: "{{ host.my_dimensions.control_plane }}"
+    cluster: "{{ host.my_dimensions.cluster }}"
+    cloud_name: "{{ host.my_dimensions.cloud_name }}"
+    audit_log_dir: "{{ audit_mount_name }}"
+    rotation_config: "{{ logging_profiles.rotation_config }}"
+    config_actions: "rotation"
+
+- name: kronos-logrotation | configure | Populate service quotas
+  become: yes
+  kronos_populate_service_quotas:
+    profiles: "{{ logging_profiles.result }}"
+    rotation_config: "{{ logging_profiles.rotation_config }}"
+    usable_log_percent: "{{ var_log_high_watermark_percent }}"
+
+# Configure Logrotate
+#-------------------------------------------------------------------------------
+- name: >-
+    kronos-logrotation | configure | Install
+    default logrotate.conf file
+  become: yes
+  copy:
+    src: logrotate.conf
+    dest: /etc/logrotate.conf
+    mode: 0644
+
+- name: kronos-logrotation | configure | Cancel automatic logrotate schedule
+  become: yes
+  file:
+    path: /etc/cron.daily/logrotate
+    state: absent
+
+# Configure Audit Logrotate
+#-------------------------------------------------------------------------------
+- name: >-
+    kronos-logrotation | configure | Install
+    default auditlogrotate.conf file
+  become: yes
+  template:
+    src: auditlogrotate.conf.j2
+    dest: /etc/auditlogrotate.conf
+    mode: 0644
+
+- name: >-
+    kronos-logrotation | configure | Set hourly auditlogrotate cron job
+  become: yes
+  copy:
+    src: auditlogrotate.sh
+    dest: /etc/cron.hourly/auditlogrotate
+    mode: 0755
+
+# Configure Logrotate Check
+#-------------------------------------------------------------------------------
+- name: kronos-logrotation | configure | Create /opt/kronos directory
+  become: yes
+  file:
+    path: "{{ opt_kronos_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: >-
+    kronos-logrotation | configure | Configure
+    Logrotate if needed script
+  become: yes
+  template:
+    src: "logrotate_if_needed.sh.j2"
+    dest: "{{ logrotate_if_needed_path }}"
+    mode: 0755
+  when: logrotate_check_enable
+
+- name: >-
+    kronos-logrotation | configure | Configure
+    rotate_if_exceeded_quota script
+  become: yes
+  template:
+    src: "rotate_if_exceeded_quota.py.j2"
+    dest: "{{ rotate_if_exceeded_quota_path }}"
+    mode: 0755
+  when: logrotate_check_enable
+
+- name: >-
+    kronos-logrotation | configure | Add
+    cron job for checking available space for logs
+  become: yes
+  cron:
+    name: "Run logrotate if high watermark hit"
+    minute: "*/{{ logrotate_check_sleep_minutes }}"
+    job: "{{ logrotate_if_needed_path }}"
+
+- name: >-
+    kronos-logrotation | configure | Add
+    cron job for checking log file sizes vs. quotas
+  become: yes
+  cron:
+    name: "Run rotate_if_exceeded_quota"
+    minute: "*/{{ logrotate_check_sleep_minutes }}"
+    job: "{{ rotate_if_exceeded_quota_path }}"
+
+# Configure logging
+#-------------------------------------------------------------------------------
+- name: logging-producer | install | Create Kronos user
+  become: yes
+  user:
+    name: "{{ kronos_user }}"
+    group: "{{ kronos_group }}"
+    shell: /usr/sbin/nologin
+    createhome: no
+    home: /tmp
+
+- name: kronos-logrotation | configure | Create log directory
+  become: yes
+  file:
+    path: "{{ kronos_log_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: kronos-logrotation | configure | Configure log file ownership
+  become: yes
+  file:
+    path: "{{ kronos_log_dir }}/{{ item }}"
+    owner: "{{ kronos_user }}"
+    group: "{{ kronos_group }}"
+    mode: 0640
+    state: touch
+  with_items:
+    - logrotate_if_needed.log
+    - rotate_if_exceeded_quota.log

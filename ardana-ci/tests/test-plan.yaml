@@ -1,0 +1,103 @@
+#
+# (c) Copyright 2016 Hewlett Packard Enterprise Development LP
+# (c) Copyright 2017 SUSE LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+---
+- name: Test Kronos API stop
+  logfile: testsuite-stop-kronos-api.log
+  prefix: stop-kronos-api
+  playbooks:
+    - kronos-api-stop.yml
+
+- name: Validate Kronos API down
+  logfile: testsuite-stop-kronos-api.log
+  prefix: validate-kronos-api-down
+  exec:
+    - validate-kronos-api-down.bash
+
+- name: Test Kronos API start
+  logfile: testsuite-start-kronos-api.log
+  prefix: start-kronos-api
+  playbooks:
+    - kronos-api-start.yml
+
+- name: Validate Kronos API up
+  logfile: testsuite-start-kronos-api.log
+  prefix: start-kronos-api
+  exec:
+    - validate-kronos-api-up.bash
+
+
+- name: Test Kronos reconfigure
+  logfile: testsuite-reconfigure-kronos.log
+  prefix: reconfigure-kronos
+  playbooks:
+    - kronos-reconfigure.yml
+
+- name: Validate Kronos API up
+  logfile: testsuite-start-kronos-api.log
+  prefix: start-kronos-api
+  exec:
+    - validate-kronos-api-up.bash
+
+
+- name: Test Kronos Producer stop
+  logfile: testsuite-stop-producer.log
+  prefix: stop-kronos-producer
+  playbooks:
+    - kronos-producer-stop.yml
+
+- name: Validate Kronos Producer down
+  logfile: testsuite-stop-kronos-producer.log
+  prefix: stop-kronos-producer
+  exec:
+    - validate-kronos-producer-down.bash
+
+- name: Test Kronos Producer start
+  logfile: testsuite-start-kronos-producer.log
+  prefix: start-kronos-producer
+  playbooks:
+    - kronos-producer-start.yml
+
+- name: Validate Kronos Producer up
+  logfile: testsuite-start-kronos-producer.log
+  prefix: start-kronos-producer
+  exec:
+    - validate-kronos-producer-up.bash
+
+
+- name: Test Kronos Server stop
+  logfile: testsuite-stop-server.log
+  prefix: stop-kronos-server
+  playbooks:
+    - kronos-server-stop.yml
+
+- name: Validate Kronos Server down
+  logfile: testsuite-stop-kronos-server.log
+  prefix: stop-kronos-server
+  exec:
+    - validate-kronos-server-down.bash
+
+- name: Test Kronos Server start
+  logfile: testsuite-start-kronos-server.log
+  prefix: start-kronos-server
+  playbooks:
+    - kronos-server-start.yml
+
+- name: Validate Kronos Server up
+  logfile: testsuite-start-kronos-server.log
+  prefix: start-kronos-server
+  exec:
+    - validate-kronos-server-up.bash

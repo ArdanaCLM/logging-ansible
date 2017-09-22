@@ -1,0 +1,136 @@
+#
+# (c) Copyright 2017 Hewlett Packard Enterprise Development LP
+# (c) Copyright 2017 SUSE LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# Set service weights in relation to each other, and optionally set the
+# number of days to retain logs if the default is unacceptable
+---
+apache2:
+    weight: 100
+    retention: default
+apt:
+    weight: 100
+    retention: default
+barbican:
+    weight: 100
+    retention: default
+beaver:
+    weight: 100
+    retention: default
+ceilometer:
+    weight: 100
+    retention: default
+ceph:
+    weight: 100
+    retention: default
+cinder:
+    weight: 100
+    retention: default
+collectl:
+    weight: 100
+    retention: default
+deployer:
+    weight: 100
+    retention: default
+designate:
+    weight: 100
+    retention: default
+eon:
+    weight: 100
+    retention: default
+foundation:
+    weight: 100
+    retention: default
+freezer:
+    weight: 100
+    retention: default
+glance:
+    weight: 100
+    retention: default
+heat:
+    weight: 100
+    retention: default
+ardana-service:
+    weight: 100
+    retention: default
+horizon:
+    weight: 100
+    retention: default
+ironic:
+    weight: 100
+    retention: default
+kafka:
+    weight: 100
+    retention: default
+keepalived:
+    weight: 100
+    retention: default
+keystone:
+    weight: 100
+    retention: default
+kronos:
+    weight: 100
+    retention: default
+logging:
+    weight: 100
+    retention: default
+magnum:
+    weight: 100
+    retention: default
+monasca:
+    weight: 100
+    retention: default
+crm:
+    weight: 100
+    retention: default
+mysql:
+    weight: 100
+    retention: default
+neutron:
+    weight: 100
+    retention: default
+nova:
+    weight: 100
+    retention: default
+octavia:
+    weight: 100
+    retention: default
+ops-console:
+    weight: 100
+    retention: default
+rabbitmq-server:
+    weight: 100
+    retention: default
+shibboleth:
+    weight: 100
+    retention: default
+spark:
+    weight: 100
+    retention: default
+swift:
+    weight: 100
+    retention: default
+syslog:
+    weight: 100
+    retention: default
+vsa:
+    weight: 100
+    retention: default
+yum:
+    weight: 100
+    retention: default
+zookeeper:
+    weight: 100
+    retention: default

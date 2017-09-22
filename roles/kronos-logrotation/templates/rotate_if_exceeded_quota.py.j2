@@ -1,0 +1,169 @@
+#!/usr/bin/python
+#
+# (c) Copyright 2017 Hewlett Packard Enterprise Development LP
+# (c) Copyright 2017 SUSE LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+
+import os
+import yaml
+import subprocess
+import logging
+import glob
+
+# Paths namespace
+paths = type('Paths', (), {
+    'logrotate_conf':'/etc/logrotate.d/'
+})
+
+# Files namespace
+files = type('Files', (), {
+    'output_log':'/var/log/kronos/rotate_if_exceeded_quota.log',
+    'service_info':'/opt/kronos/service_info.yml'
+})
+
+
+class Service:
+
+    # Instance Variables
+    subservices = []
+    log_files = []
+    name = ''
+    quota = 0
+    usage = 0
+
+    # Constructor
+    def __init__(self, name, quota, log_files, subservices):
+        self.name = name
+        self.quota = quota
+        self.log_files = log_files
+        self.subservices = subservices
+        self.calculate_usage()
+
+    def __lt__(self, other):
+        if self.name < other.name:
+            return True
+        else:
+            return False
+
+    def __gt__(self, other):
+        if self.name > other.name:
+            return False
+        else:
+            return True
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
+
+    def rotate(self):
+        """Rotate all subservices which belong to this service
+        :returns: Nothing
+        """
+        logging.debug('From service: [{}], rotating the {} following subservices.'.format(self.name, len(self.subservices)))
+        logging.debug(self.subservices)
+
+        for subservice in self.subservices:
+
+            # Run logrotate for subservice with -f flag to force rotation and pipe any stderr to log
+            if os.path.isfile(os.path.join(paths.logrotate_conf, subservice)):
+                logging.debug('--Start [{}] logrotate Subprocess Call--'.format(subservice))
+                sp = subprocess.Popen(['sudo', 'logrotate', os.path.join(paths.logrotate_conf, subservice), '-f'],
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                sp.wait()
+                stdout, stderr = sp.communicate()
+                if stderr:
+                    logging.debug(stderr)
+                logging.debug('--End [{}] logrotate Subprocess Call--'.format(subservice))
+
+            # If file doesn't exist, log a warning message
+            else:
+                logging.warn('Config file {} does not exist... Not rotating'.format(subservice))
+
+    def calculate_usage(self):
+        """Calculates the usage for each service
+        :returns: Nothing
+        """
+        _sum = 0
+        all_logs = []
+
+        # Match log files w/ globs to files on system ( /var/log/apache2/* -> /var/log/apache2/access.log , /var/log/apache2/access.log.1.gz, ... )
+        for log_file in self.log_files:
+
+            if not log_file.endswith('*'):
+                log_file += "*"
+
+	    all_logs += glob.glob(log_file+'*')
+
+        # Retrieve and sum file size of every file we have found
+        for log_file in set(all_logs):
+            _sum += os.path.getsize(log_file) * (10 ** -6)
+
+        self.usage = _sum
+
+def print_services_to_rotate(services):
+    """Only needed for printing/logging if needed at all
+    :services: Dictionary { Service Name : Service Object } of all services which will be rotated
+    :returns: Nothing
+    """
+
+    # Create list of services which have exceeded their quota
+    to_rotate = []
+    for key, service in services.iteritems():
+        if service.usage > service.quota:
+            to_rotate.append(service)
+
+    # Log the number of services we will rotate
+    number_to_rotate = len(to_rotate)
+    if number_to_rotate == 0:
+        logging.info('No services exceeded their quota, not rotating')
+    else:
+        logging.info('The following {} services exceeded their quota, rotating..'.format(number_to_rotate))
+        logging.info(str(to_rotate))
+
+    # Log each service we will rotate including their Usage and Quota
+    for service in sorted(to_rotate):
+        logging.debug('\t-{}\t\t\t\tUsage: {} | Quota: {}'.format(service.name, service.usage, service.quota))
+
+#-------------------------------------------------------------------------------
+try:
+
+    # Configure Logging
+    logging.basicConfig(filename=files.output_log,
+                        level=logging.INFO, format='%(asctime)s %(message)s')
+    logging.info('rotate_if_exceeded_quota START')
+
+    # Create Service objects
+    with open(os.path.join(files.service_info), 'r') as f:
+        service_info = yaml.load(f)
+    services = {}
+    for service_name, config in service_info.iteritems():
+        services[service_name] = Service(service_name, config['quota'], config['files'], config['subservices'])
+
+    # For sequential logging
+    print_services_to_rotate(services)
+
+    # Rotate services which are over their quota
+    for service_name, service in sorted(services.items()):
+        if service.usage > service.quota:
+            service.rotate()
+
+    # Shutdown Logging
+    logging.info('rotate_if_exceeded_quota END')
+    logging.shutdown()
+
+except Exception, e:
+    logging.exception(e)

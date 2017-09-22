@@ -1,0 +1,127 @@
+#
+# (c) Copyright 2016 Hewlett Packard Enterprise Development LP
+# (c) Copyright 2017 SUSE LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+---
+
+# Determine if elasticsearch should be upgraded
+#------------------------------------------------------------------------------
+- name: logging-server | upgrade | Get Elasticsearch current version
+  become: yes
+  shell: >-
+    dpkg -l | grep " elasticsearch " | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
+  register: elasticsearch_ver_result
+
+- name: logging-server | upgrade | Set Elasticsearch upgrade fact
+  become: yes
+  set_fact:
+    upgrade_elasticsearch: true
+  when: elasticsearch_ver_result.stdout == '1.6.2'
+
+# Tweak ELK stack unit files to avoid Kibana and Logstash restarting
+#------------------------------------------------------------------------------
+- name: logging-server | upgrade | Set Kibana/Logstash to not restart
+  become: yes
+  lineinfile:
+    dest: "{{ item }}"
+    state: absent
+    regexp: 'BindsTo=.*'
+  with_items:
+    - /etc/systemd/system/kibana.service
+    - /etc/systemd/system/logstash.service
+  when: upgrade_elasticsearch is defined
+
+- name: logging-server | upgrade | Set Elasticsearch to not restart others
+  become: yes
+  lineinfile:
+    dest: /etc/systemd/system/elasticsearch.service
+    state: absent
+    regexp: 'Wants=.*'
+  when: upgrade_elasticsearch is defined
+
+- name: logging-server | upgrade | Reload systemd to pick up changes
+  become: yes
+  command: systemctl daemon-reload
+  when: upgrade_elasticsearch is defined
+
+# Prepare ELK stack for upgrade
+#------------------------------------------------------------------------------
+- include: stop-logstash.yml
+  when: upgrade_elasticsearch is defined
+
+- include: stop-kibana.yml
+  when: upgrade_elasticsearch is defined
+
+- name: logging-server | upgrade | Wait for Elasticsearch readiness
+  become: yes
+  shell: python {{ opt_kronos_dir }}/esutil.py --ready --clustered --healthy
+  run_once: true
+
+- name: logging-server | upgrade | Migrate Elasticsearch data or delete it
+  become: yes
+  shell: python {{ opt_kronos_dir }}/esutil.py --migrate
+  when: upgrade_elasticsearch is defined
+  run_once: true
+
+- include: stop-elasticsearch.yml
+  when: upgrade_elasticsearch is defined
+
+- name: logging-server | upgrade | Wipe deprecated Elasticsearch plugins
+  become: yes
+  file:
+    path: "{{ elasticsearch_plugin_dir }}/*"
+    state: absent
+  when: upgrade_elasticsearch is defined
+
+# Clean up old Kibana version
+#------------------------------------------------------------------------------
+- name: logging-server | upgrade | Get current version of Kibana
+  become: yes
+  shell: >-
+    cat /opt/kibana/README.txt | grep "Kibana [0-9].[0-9]" |
+    sed "s/Kibana \([0-9]\.[0-9]\.[0-9]\).*/\1/"
+  register: kibana_ver_result
+
+# Need to be careful about deleting this directory as the new version installs
+# to the same location so if upgrade is run more than once we'll wipe the new
+# version
+- name: logging-server | upgrade | Wipe deprecated Kibana tarball version
+  become: yes
+  file:
+    path: "/opt/kibana"
+    state: absent
+  when: kibana_ver_result.stdout == "4.1.1"
+
+# Remove old prime script
+#------------------------------------------------------------------------------
+- name: logging-server | upgrade | Wipe old prime kibana script
+  become: yes
+  file:
+    path: "/opt/kronos/prime_kibana.py"
+    state: absent
+
+# Remove deprecated rabbit functionality
+#------------------------------------------------------------------------------
+- name: logging-server | upgrade | Wipe cron job for prime rabbit script
+  become: yes
+  cron:
+    name: "Prime Rabbit"
+    state: absent
+
+- name: logging-server | upgrade | Wipe prime rabbit script
+  become: yes
+  file:
+    path: "/opt/kronos/prime_rabbit.py"
+    state: absent

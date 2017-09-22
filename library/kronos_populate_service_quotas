@@ -1,0 +1,111 @@
+#!/usr/bin/python
+#
+# (c) Copyright 2017 Hewlett Packard Enterprise Development LP
+# (c) Copyright 2017 SUSE LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+import os
+import yaml
+import platform
+
+# Keys namespace
+keys = type('Keys', (), {
+    'name':'name',
+    'files':'files',
+    'service':'service',
+    'subservices':'subservices',
+    'opt':'logging_options',
+    'quota':'quota',
+    'os_family':'os_family'
+})
+
+# Directory namespace
+dirs = type('Dirs', (), {
+    'logging':'/var/log'
+})
+
+#-------------------------------------------------------------------------------
+def main():
+    module = AnsibleModule(
+            argument_spec=dict(
+            profiles             = dict(required=True),  # Output of load_profiles
+            rotation_config      = dict(required=True),  # Service weights
+            usable_log_percent   = dict(required=True),  # Applied prior to calculating quotas
+            service_info_dir     = dict(default="/opt/kronos")
+           ),
+           supports_check_mode=False
+       )
+
+    try:
+
+        # Get profiles and service weights from Ansible playbook
+        params = type('Params', (), module.params)
+        profiles = params.profiles
+        service_weights = {service: params.rotation_config[service]['weight'] for service in params.rotation_config}
+        os_family = platform.dist()[0].lower()
+
+        # Extract service info from profiles passed in through Ansible
+        service_info = {}
+        for value in profiles.values():
+            if keys.os_family in value:
+               if os_family != value[keys.os_family].lower():
+                   continue
+
+            service_info.setdefault(value[keys.service], {keys.subservices: [], keys.files: []})
+            service_info[value[keys.service]][keys.subservices].append(value[keys.name])
+            for opt in value[keys.opt]:
+                service_info[value[keys.service]][keys.files] += opt[keys.files]
+
+        # Filters out Service weights which are not running on the node
+        filtered_weights = {x: service_weights[x] for x in [y[keys.service] for y in profiles.values()]}
+
+        # Get logging space available
+        disk_stats = os.statvfs(dirs.logging)
+        logging_space_available = disk_stats.f_blocks * disk_stats.f_bsize * (10 ** -6) * (float(params.usable_log_percent) / 100)
+
+        # Create service quotas
+        _sum = float(sum(filtered_weights.values()))
+        for service in service_info:
+            service_info[service][keys.quota] = int((filtered_weights[service] / _sum) * logging_space_available)
+
+        # Read in existing file
+        changed = False
+        old_data = None
+        service_info_path = os.path.join(params.service_info_dir, "service_info.yml")
+        if not os.path.exists(params.service_info_dir):
+            os.makedirs(params.service_info_dir)
+
+        if os.path.exists(service_info_path):
+            with open(service_info_path, 'r') as service_info_file:
+                old_data = service_info_file.read()
+
+        # If the new file is different, write our new file
+        if old_data != yaml.dump(service_info):
+            with open(service_info_path, 'w') as service_info_file:
+                yaml.dump(service_info, service_info_file)
+                changed = True
+
+    except Exception, e:
+        module.fail_json(msg="{}".format(e))
+    finally:
+        module.exit_json(changed=changed)
+
+
+# Execute main as an Ansible module
+#-------------------------------------------------------------------------------
+from ansible.module_utils.basic import *
+if __name__ == '__main__':
+    main()
+
+
