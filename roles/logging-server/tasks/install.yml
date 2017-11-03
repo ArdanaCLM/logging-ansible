@@ -18,7 +18,11 @@
 
 # Install Kronos server stack misc.
 #------------------------------------------------------------------------------
-- name: logging-producer | install | Create Kronos user
+
+- name: logging-server | install | include OS specific variables
+  include_vars: "{{ ansible_os_family | lower }}.yml"
+
+- name: logging-server | install | Create Kronos user
   become: yes
   user:
     name: "{{ kronos_user }}"
@@ -26,20 +30,12 @@
     shell: /usr/sbin/nologin
     createhome: no
 
-- name: logging-server | install | Install hLinux packages
+- name: logging-server | install | Install OS specific required packages
   become: yes
-  apt:
-    pkg: "{{ item }}"
-    install_recommends: no
-    state: latest
-    force: yes
-  with_items:
-    - curl
-    - default-jre-headless
-    - python-passlib
-    - python-pika
-    - python-yaml
-    - elasticsearch-curator
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: logging_server_required_packages
   register: ardana_notify_kronos_restart
 
 - name: logging-server | install | Create /opt/kronos directory
@@ -65,6 +61,14 @@
   install_package:
     cache: update
 
+- name: logging-server | install | Install logging server components in SLES
+  become: yes
+  zypper:
+    name: "{{ item }}"
+    state: present
+  with_items: logging_server_component_packages
+  when: ansible_os_family | lower == 'suse'
+
 # Installing Elasticsearch
 #------------------------------------------------------------------------------
 - name: logging-server | install | Install Elasticsearch venv package
@@ -83,6 +87,7 @@
     elasticsearch_pkg_dir: "{{ ardana_notify_elasticsearch_install.name|\
       jar_dir(ardana_notify_elasticsearch_install.version) }}"
   when: >-
+    (ansible_os_family | lower == 'debian') and
     not ardana_notify_elasticsearch_install is not defined and
     ardana_notify_elasticsearch_install.changed
 
@@ -92,20 +97,20 @@
     basename `ls -1 {{ elasticsearch_pkg_dir }}/*.deb` |
     sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
   register: elasticsearch_new_ver_result
-  when: elasticsearch_install is defined
+  when: (ansible_os_family | lower == 'debian') and elasticsearch_install is defined
 
 - name: logging-server | install | Register Elasticsearch current version
   become: yes
   shell: >-
     dpkg -l | grep " elasticsearch " | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
   register: elasticsearch_ver_result
-  when: elasticsearch_install is defined
+  when: (ansible_os_family | lower == 'debian') and elasticsearch_install is defined
 
 - name: logging-server | install | Register new Elasticsearch pkg path
   become: yes
   shell: basename `ls -1 {{ elasticsearch_pkg_dir }}/*.deb`
   register: elasticsearch_pkg_result
-  when: elasticsearch_install is defined
+  when: (ansible_os_family | lower == 'debian') and elasticsearch_install is defined
 
 - name: logging-server | install | Install Elasticsearch pkg
   become: yes
@@ -115,8 +120,12 @@
   when: >-
     ardana_notify_elasticsearch_install is defined and
     ardana_notify_elasticsearch_install.changed or
+    (ansible_os_family | lower == 'debian') and
+    ardana_notify_elasticsearch_install is defined and
+    ardana_notify_elasticsearch_install.changed or
     elasticsearch_ver_result.stdout != elasticsearch_new_ver_result.stdout
   register: ardana_notify_elasticsearch_restart
+
 
 - name: logging-server | install | Ensure elasticsearch has permissions
   become: yes
@@ -152,6 +161,7 @@
     logstash_pkg_dir: "{{ ardana_notify_logstash_install.name|\
       jar_dir(ardana_notify_logstash_install.version) }}"
   when: >-
+    (ansible_os_family | lower == 'debian') and
     not ardana_notify_logstash_install is not defined and
     ardana_notify_logstash_install.changed
 
@@ -161,19 +171,19 @@
     basename `ls -1 {{ logstash_pkg_dir }}/*.deb` |
     sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
   register: logstash_new_ver_result
-  when: logstash_install is defined
+  when: (ansible_os_family | lower == 'debian') and logstash_install is defined
 
 - name: logging-server | install | Register Logstash current installed version
   become: yes
   shell: dpkg -l | grep " logstash " | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
   register: logstash_ver_result
-  when: logstash_install is defined
+  when: (ansible_os_family | lower == 'debian') and logstash_install is defined
 
 - name: logging-server | install | Register new Logstash pkg path
   become: yes
   shell: basename `ls -1 {{ logstash_pkg_dir }}/*.deb`
   register: logstash_pkg_result
-  when: logstash_install is defined
+  when: (ansible_os_family | lower == 'debian') and logstash_install is defined
 
 - name: logging-server | install | Install Logstash pkg
   become: yes
@@ -181,6 +191,7 @@
     dpkg --force-confnew -i
     {{ logstash_pkg_dir }}/{{ logstash_pkg_result.stdout }}
   when: >-
+    (ansible_os_family | lower == 'debian') and
     ardana_notify_logstash_install is defined and
     ardana_notify_logstash_install.changed or
     logstash_ver_result.stdout != logstash_new_ver_result.stdout
@@ -204,6 +215,7 @@
     kibana_pkg_dir: "{{ ardana_notify_kibana_install.name|\
       jar_dir(ardana_notify_kibana_install.version) }}"
   when: >-
+    (ansible_os_family | lower == 'debian') and
     not ardana_notify_kibana_install is not defined and
     ardana_notify_kibana_install.changed
 
@@ -213,25 +225,26 @@
     basename `ls -1 {{ kibana_pkg_dir }}/*.deb` |
     sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
   register: kibana_new_ver_result
-  when: kibana_install is defined
+  when: (ansible_os_family | lower == 'debian') and kibana_install is defined
 
 - name: logging-server | install | Register Kibana current version
   become: yes
   shell: dpkg -l | grep " kibana " | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
   register: kibana_ver_result
-  when: kibana_install is defined
+  when: (ansible_os_family | lower == 'debian') and kibana_install is defined
 
 - name: logging-server | install | Register new Kibana pkg path
   become: yes
   shell: basename `ls -1 {{ kibana_pkg_dir }}/*.deb`
   register: kibana_pkg_result
-  when: kibana_install is defined
+  when: (ansible_os_family | lower == 'debian') and kibana_install is defined
 
 - name: logging-server | install | Install Kibana pkg
   become: yes
   shell: >-
     dpkg --force-confnew -i {{ kibana_pkg_dir }}/{{ kibana_pkg_result.stdout }}
   when: >-
+    (ansible_os_family | lower == 'debian') and
     ardana_notify_kibana_install is defined and
     ardana_notify_kibana_install.changed or
     kibana_ver_result.stdout != kibana_new_ver_result.stdout
@@ -245,6 +258,7 @@
     owner: kibana
     group: adm
     mode: 0755
+
 
 # Install systemd service units
 #------------------------------------------------------------------------------

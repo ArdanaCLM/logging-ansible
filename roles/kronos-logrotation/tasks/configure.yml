@@ -18,26 +18,16 @@
 
 # Install Logging Dependencies
 #------------------------------------------------------------------------------
-- name: logging-producer | install | Install logging dependencies (Debian)
-  become: yes
-  apt:
-    name: python-yaml
-    state: latest
-  when: ansible_os_family == "Debian"
 
-- name: logging-producer | install | Install logging dependencies (RHEL)
-  become: yes
-  yum:
-    name: python-yaml
-    state: latest
-  when: ansible_os_family == "RedHat"
+- name: kronos-logrotation | configure | include OS specific variables
+  include_vars: "{{ ansible_os_family | lower }}.yml"
 
-- name: logging-producer | install | Install logging dependencies SUSE
+- name: kronos-logrotation | configure | Install logging dependencies
   become: yes
-  zypper:
-    name: python-yaml
+  package:
+    name: "{{ item }}"
     state: latest
-  when: ansible_os_family == "Suse"
+  with_items: kronos_logrotation_dependencies
 
 # Configure logging for the implicated services
 #------------------------------------------------------------------------------
@@ -154,7 +144,7 @@
 
 # Configure logging
 #-------------------------------------------------------------------------------
-- name: logging-producer | install | Create Kronos user
+- name: kronos-logrotation | install | Create Kronos user
   become: yes
   user:
     name: "{{ kronos_user }}"
