@@ -22,13 +22,15 @@
   become: yes
   shell: >-
     dpkg -l | grep " elasticsearch " | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
+  when: ansible_os_family | lower == 'debian'
   register: elasticsearch_ver_result
 
 - name: logging-server | upgrade | Set Elasticsearch upgrade fact
   become: yes
   set_fact:
     upgrade_elasticsearch: true
-  when: elasticsearch_ver_result.stdout == '1.6.2'
+  when: (ansible_os_family | lower == 'debian' and
+         elasticsearch_ver_result.stdout == '1.6.2')
 
 # Tweak ELK stack unit files to avoid Kibana and Logstash restarting
 #------------------------------------------------------------------------------

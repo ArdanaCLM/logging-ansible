@@ -37,7 +37,12 @@ TimeoutSec=5min
 User=elasticsearch
 Group=elasticsearch
 
+# RPM install did not have this pre-check file as $CONF_FILE variable is not set
+# in /etc/sysconfig/elasticsearch file. So this pre check is not needed.
+# pre-check : https://github.com/elastic/elasticsearch/pull/13772/files#r40351893
+{%- if ansible_os_family | lower == 'suse' %}
 ExecStartPre=/usr/share/elasticsearch/bin/elasticsearch-systemd-pre-exec
+{% endif %}
 
 ExecStart=/usr/share/elasticsearch/bin/elasticsearch \
                                                 -Des.pidfile=${PID_DIR}/elasticsearch.pid \
