@@ -118,8 +118,6 @@
     dpkg --force-confnew -i
     {{ elasticsearch_pkg_dir }}/{{ elasticsearch_pkg_result.stdout }}
   when: >-
-    ardana_notify_elasticsearch_install is defined and
-    ardana_notify_elasticsearch_install.changed or
     (ansible_os_family | lower == 'debian') and
     ardana_notify_elasticsearch_install is defined and
     ardana_notify_elasticsearch_install.changed or
