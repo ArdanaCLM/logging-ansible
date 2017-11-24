@@ -152,3 +152,18 @@ sub_service:
       centralized_audit_logging:
         enabled: true
         format: rawjson
+    - files:
+      - /var/log/nova/nova-placement-api.log
+      - /var/log/nova/nova_placement_api_wsgi-access.log
+      - /var/log/nova/nova_placement_api_wsgi.log
+      centralized_logging:
+        enabled: true
+        format: json
+      log_rotate:
+      - daily
+      - compress
+      - missingok
+      - copytruncate
+      - maxsize 180M
+      - rotate 7
+      - create 640 nova adm
