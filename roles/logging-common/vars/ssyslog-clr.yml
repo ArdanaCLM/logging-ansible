@@ -57,6 +57,7 @@ sub_service:
       - /var/log/alternatives.log
       - /var/log/install_package.log
       - /var/log/setup_systemd.log
+      - /var/log/rc.dhcpd.log
       centralized_logging:
         enabled: false
         format: json

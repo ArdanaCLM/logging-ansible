@@ -1,5 +1,4 @@
 #
-# (c) Copyright 2015-2017 Hewlett Packard Enterprise Development LP
 # (c) Copyright 2017 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -16,21 +15,22 @@
 #
 ---
 sub_service:
-  hosts: FND-AP2
-  name: apache2
+  hosts: .*
+  # Name overrides package provided profile intentionally
+  name: pbl
   service: foundation
+  os_family: SUSE
   logging_options:
     - files:
-      - /var/log/apache2/*_log
+      - /var/log/pbl
       centralized_logging:
         enabled: false
         format: json
       log_rotate:
-      - weekly
-      - compress
-      - missingok
-      - copytruncate
       - rotate 7
+      - daily
       - maxsize 45M
-      - delaycompress
+      - missingok
+#      - copytruncate # any log with postrotate script should not have copytruncate
+      - compress
       - create 640 root adm
