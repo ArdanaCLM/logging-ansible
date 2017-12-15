@@ -22,13 +22,13 @@ Listen {{ kronos_api_host }}:{{ kronos_api_port }}
     WSGIDaemonProcess log-api processes=4 threads=4 socket-timeout=300  user={{ kronos_user }} group={{ kronos_group }} python-path=/opt/stack/service/kronos/venv:/opt/stack/service/kronos/venv/bin/../lib/python2.7/site-packages/ display-name=monasca-log-api
     WSGIProcessGroup log-api
     WSGIApplicationGroup log-api
-    WSGIScriptAlias / {{ kronos_wsgi_dir }}/app.wsgi
+    WSGIScriptAlias / /opt/stack/service/kronos/venv/bin/monasca-log-api-wsgi
 
     ErrorLog /var/log/kronos/wsgi.log
     LogLevel info
     CustomLog /var/log/kronos/wsgi-access.log combined
 
-    <Directory /opt/stack/service/kronos/venv/bin/../lib/python2.7/site-packages/monasca_log_api>
+    <Directory /opt/stack/service/kronos/venv/bin>
       Options Indexes FollowSymLinks MultiViews
       Require all granted
       AllowOverride None

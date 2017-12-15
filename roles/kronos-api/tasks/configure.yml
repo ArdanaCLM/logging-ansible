@@ -22,7 +22,7 @@
   become: yes
   template:
     src: kronos-api.ini.j2
-    dest: /etc/monasca/log-api-config.ini
+    dest: /etc/monasca/log-api-paste.ini
     owner: "{{ kronos_user }}"
     group: "{{ kronos_group }}"
     mode: 0600
@@ -33,22 +33,12 @@
   become: yes
   template:
     src: kronos-api.conf.j2
-    dest: /etc/monasca/log-api-config.conf
+    dest: /etc/monasca/log-api.conf
     owner: "{{ kronos_user }}"
     group: "{{ kronos_group }}"
     mode: 0600
   register: ardana_notify_kronos_api_restart
   when: ( 'MON_API' in verb_hosts )
-
-- name: kronos-api | configure | Configure Kronos API WSGI file
-  become: yes
-  template:
-    src: app.wsgi.j2
-    dest: "{{ kronos_wsgi_dir }}/app.wsgi"
-    owner: "{{ kronos_user }}"
-    group: "{{ kronos_group }}"
-    mode: 0755
-  register: ardana_notify_kronos_api_restart
 
 - name: kronos-api | configure | Configure Kronos/Apache virtualhost available
   become: yes
