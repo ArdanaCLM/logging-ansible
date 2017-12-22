@@ -32,6 +32,19 @@
   until: permissions_result|success
 
 - name: >-
+    kronos-logrotation | configure-rhel | Set /var/log/libvirt SELinux context
+  become: yes
+  file:
+    recurse: yes
+    path: /var/log/libvirt
+    state: directory
+    seuser: system_u
+    serole: object_r
+    setype: virt_log_t
+  register: permissions_result
+  until: permissions_result|success
+
+- name: >-
     kronos-logrotation | configure-rhel | Set
     /var/log/audit SELinux context
   become: yes
