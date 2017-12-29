@@ -134,6 +134,19 @@
     group: elasticsearch
     mode: 0750
 
+- name: logging-server | install | Identify installed kibana package version
+  become: yes
+  shell: >-
+    zypper -n info {{ zypper_kibana_package_name }} |
+    sed -n -e 's/^Version.*:\s*\([0-9].[0-9].[0-9]\).*/\1/p'
+  register: installed_kibana_version_result
+  when: ansible_os_family | lower == 'suse'
+
+- name: logging-server | install | Set installed kibana package version fact
+  set_fact:
+    kibana_package_version: "{{ installed_kibana_version_result.stdout }}"
+  when: ansible_os_family | lower == 'suse'
+
 - name: logging-server | install | Install Elasticsearch util script
   become: yes
   template:

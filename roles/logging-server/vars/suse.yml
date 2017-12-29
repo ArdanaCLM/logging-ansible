@@ -26,3 +26,9 @@ logging_server_component_packages:
   - elasticsearch
   - logstash
   - kibana
+
+zypper_kibana_package_name: kibana
+
+# Installed kibana package version. Left blank here as value is
+# determined using zypper info
+kibana_package_version:
