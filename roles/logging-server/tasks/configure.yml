@@ -18,10 +18,13 @@
 
 # Configure Kafka
 #------------------------------------------------------------------------------
+- name: logging-server | configure | include kafka vars
+  include_vars: ../../kafka/vars/main.yml
+
 - name: logging-server | configure | Check for Kafka topic
   become: yes
   shell: >-
-    /opt/kafka/bin/kafka-topics.sh --list --zookeeper
+    {{ kafka_bin_dir }}/kafka-topics.sh --list --zookeeper
     {{ kronos_zookeeper_hosts }} | grep {{ kronos_kafka_topic }}
   ignore_errors: yes
   run_once: true
@@ -30,7 +33,7 @@
 - name: logging-server | configure | Configure Kafka topic
   become: yes
   shell: >-
-    /opt/kafka/bin/kafka-topics.sh --create --zookeeper
+    {{ kafka_bin_dir }}/kafka-topics.sh --create --zookeeper
     {{ kronos_zookeeper_hosts }} --replication-factor
     {{ kronos_kafka_replication_factor }} --partitions
     {{ kronos_kafka_partitions }} --topic {{ kronos_kafka_topic }}
@@ -40,7 +43,7 @@
 - name: logging-server | configure | Configure per topic segment rotation
   become: yes
   command: >-
-    /opt/kafka/bin/kafka-topics.sh --zookeeper {{ kronos_zookeeper_hosts }}
+    {{ kafka_bin_dir }}/kafka-topics.sh --zookeeper {{ kronos_zookeeper_hosts }}
     --topic {{ kronos_kafka_topic }} --alter
     --config segment.ms={{ kafka_segment_minutes * 60 * 1000 }}
   run_once: true
