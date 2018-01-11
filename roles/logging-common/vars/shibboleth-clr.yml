@@ -34,4 +34,4 @@ sub_service:
       - compress
       - missingok
       - copytruncate
-      - create 640 _shibd adm
+      - create 640 shibd adm
