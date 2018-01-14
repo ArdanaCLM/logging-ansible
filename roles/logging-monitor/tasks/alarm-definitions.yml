@@ -28,6 +28,9 @@
     keystone_user: "{{ keystone_admin_user }}"
     keystone_password: "{{ keystone_admin_password | quote }}"
     keystone_project: "{{ kronos_monitoring_project }}"
+    keystone_project_domain: "{{ keystone_admin_project_domain }}"
+    keystone_user_domain: "{{ keystone_admin_user_domain }}"
+    keystone_verify: "{{ system_cacert_file }}"
     monasca_api_url: "{{ monasca_alarm_definition_api_url }}"
     overwrite: false
   register: default_notification_result
@@ -52,7 +55,13 @@
     state: absent
     name: "{{ item.name }}"
     monasca_api_url: "{{ monasca_alarm_definition_api_url }}"
-    keystone_token: "{{ default_notification_result.keystone_token }}"
+    keystone_url: "{{ keystone_admin_endpoint }}"
+    keystone_user: "{{ keystone_admin_user }}"
+    keystone_password: "{{ keystone_admin_password | quote }}"
+    keystone_project: "{{ kronos_monitoring_project }}"
+    keystone_project_domain: "{{ keystone_admin_project_domain }}"
+    keystone_user_domain: "{{ keystone_admin_user_domain }}"
+    keystone_verify: "{{ system_cacert_file }}"
     severity: "Medium"
     ok_actions:
       - "{{ default_notification_result.notification_method_id }}"
@@ -74,7 +83,13 @@
     description: "{{ item.description }}"
     expression: "{{ item.expression }}"
     monasca_api_url: "{{ monasca_alarm_definition_api_url }}"
-    keystone_token: "{{ default_notification_result.keystone_token }}"
+    keystone_url: "{{ keystone_admin_endpoint }}"
+    keystone_user: "{{ keystone_admin_user }}"
+    keystone_password: "{{ keystone_admin_password | quote }}"
+    keystone_project: "{{ kronos_monitoring_project }}"
+    keystone_project_domain: "{{ keystone_admin_project_domain }}"
+    keystone_user_domain: "{{ keystone_admin_user_domain }}"
+    keystone_verify: "{{ system_cacert_file }}"
     match_by: ["hostname"]
     severity: "{{ item.severity | default('LOW') }}"
     ok_actions:
@@ -183,7 +198,13 @@
     expression: >-
       directory.size_bytes>{{ service_log_directory_size_quota*1024*1024*1024 }}
     monasca_api_url: "{{ monasca_alarm_definition_api_url }}"
-    keystone_token: "{{ default_notification_result.keystone_token }}"
+    keystone_url: "{{ keystone_admin_endpoint }}"
+    keystone_user: "{{ keystone_admin_user }}"
+    keystone_password: "{{ keystone_admin_password | quote }}"
+    keystone_project: "{{ kronos_monitoring_project }}"
+    keystone_project_domain: "{{ keystone_admin_project_domain }}"
+    keystone_user_domain: "{{ keystone_admin_user_domain }}"
+    keystone_verify: "{{ system_cacert_file }}"
     match_by: ["service","hostname","path"]
     severity: "Low"
     ok_actions:
