@@ -1,6 +1,6 @@
 #
 # (c) Copyright 2015-2017 Hewlett Packard Enterprise Development LP
-# (c) Copyright 2017 SUSE LLC
+# (c) Copyright 2017-2018 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -60,6 +60,7 @@
   become: yes
   install_package:
     cache: update
+  when: deployer_media_legacy_layout|bool
 
 - name: logging-server | install | Install logging server components in SLES
   become: yes
@@ -71,7 +72,7 @@
 
 # Installing Elasticsearch
 #------------------------------------------------------------------------------
-- name: logging-server | install | Install Elasticsearch venv package
+- name: logging-server | install | Install Elasticsearch venv package (legacy)
   become: yes
   install_package:
     name: elasticsearch_235
@@ -79,6 +80,15 @@
     state: present
     activate: act_off
   register: ardana_notify_elasticsearch_install
+  when: deployer_media_legacy_layout|bool
+
+- name: logging-server | install | Install Elasticsearch package (SUSE)
+  become: yes
+  zypper:
+    name: elasticsearch
+    state: present
+  register: ardana_notify_elasticsearch_install
+  when: not deployer_media_legacy_layout|bool
 
 - name: logging-server | install | Set Elasticsearch venv varibles
   become: yes
@@ -156,7 +166,7 @@
 
 # Installing Logstash
 #------------------------------------------------------------------------------
-- name: logging-server | install | Install Logstash venv package
+- name: logging-server | install | Install Logstash venv package (legacy)
   become: yes
   install_package:
     name: logstash_232
@@ -164,6 +174,15 @@
     state: present
     activate: act_off
   register: ardana_notify_logstash_install
+  when: deployer_media_legacy_layout|bool
+
+- name: logging-server | install | Install Logstash rpm package (SUSE)
+  become: yes
+  zypper:
+    name: logstash
+    state: present
+  register: ardana_notify_logstash_install
+  when: not deployer_media_legacy_layout|bool
 
 - name: logging-server | install | Set Logstash venv varibles
   become: yes
@@ -210,7 +229,8 @@
 
 # Installing Kibana
 #------------------------------------------------------------------------------
-- name: logging-server | install | Install Kibana venv package
+
+- name: logging-server | install | Install Kibana venv package (legacy)
   become: yes
   install_package:
     name: kibana_450
@@ -218,6 +238,15 @@
     state: present
     activate: act_off
   register: ardana_notify_kibana_install
+  when: deployer_media_legacy_layout|bool
+
+- name: logging-server | install | Install Kibana rpm package (SUSE)
+  become: yes
+  zypper:
+    name: kibana
+    state: present
+  register: ardana_notify_kibana_install
+  when: not deployer_media_legacy_layout|bool
 
 - name: logging-server | install | Set Kibana venv varibles
   become: yes
