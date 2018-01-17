@@ -15,4 +15,5 @@
 #
 ---
 kronos_logrotation_dependencies:
+  - cron
   - python-PyYAML
