@@ -65,7 +65,8 @@
 - name:  logging-server | start-kibana | Enable Kibana site
   become: yes
   command: a2ensite kibana-apache2
-  when: not kibana_site_file_result.stat.exists
+  when: ( not kibana_site_file_result.stat.exists and
+          ansible_os_family == 'Debian')
 
 # Ensure Apache is reloaded via Apache owned playbook
 - include: "{{ playbook_dir }}/roles/FND-AP2/tasks/start_reload.yml"

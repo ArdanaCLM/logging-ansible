@@ -50,7 +50,8 @@
 - name: kronos-api | start | Enable Kronos site
   become: yes
   command: a2ensite kronos-apache2
-  when: not kronos_site_file_result.stat.exists
+  when: ( not kronos_site_file_result.stat.exists and
+          ansible_os_family == 'Debian' )
 
 - include: "{{ playbook_dir }}/roles/FND-AP2/tasks/start_reload.yml"
   vars:
