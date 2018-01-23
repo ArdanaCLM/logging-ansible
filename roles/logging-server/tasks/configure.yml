@@ -159,18 +159,19 @@
   become: yes
   template:
     src: kibana-apache2.conf.j2
-    dest: /etc/apache2/sites-available/kibana-apache2.conf
+    dest: "{{ apache2_vhost_dir }}/kibana-apache2.conf"
     mode: 0644
   register: ardana_notify_kronos_conf_change
 
 - name: logging-server | configure | Configure Kibana/Apache virtualhost enabled
   become: yes
   file:
-    src: "/etc/apache2/sites-available/kibana-apache2.conf"
+    src: "{{ apache2_vhost_dir }}/kibana-apache2.conf"
     dest: "/etc/apache2/sites-enabled/kibana-apache2.conf"
     state: link
     mode: 0644
   register: ardana_notify_kronos_conf_change
+  when: ansible_os_family == 'Debian'
 
 - name: logging-server | configure | Create Kibana log file
   become: yes
