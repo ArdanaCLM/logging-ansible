@@ -15,6 +15,22 @@
 # under the License.
 #
 ---
+- name: logging-server | pre-upgrade | include OS specific variables
+  include_vars: "{{ ansible_os_family | lower }}.yml"
+
+- name: logging-server | pre-upgrade | Identify installed kibana package version
+  become: yes
+  shell: >-
+    zypper -n info {{ zypper_kibana_package_name }} |
+    sed -n -e 's/^Version.*:\s*\([0-9].[0-9].[0-9]\).*/\1/p'
+  register: installed_kibana_version_result
+  when: ansible_os_family | lower == 'suse'
+
+- name: logging-server | pre-upgrade | Set installed kibana package version fact
+  set_fact:
+    kibana_package_version: "{{ installed_kibana_version_result.stdout }}"
+  when: ansible_os_family | lower == 'suse'
+
 - name: logging-server | pre-upgrade | Install Elasticsearch util script
   become: yes
   template:
