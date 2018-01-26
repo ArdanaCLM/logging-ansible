@@ -18,12 +18,16 @@ sub_service:
   hosts: FND-CDB
   name: cassandra
   service: cassandra
+  monitoring:
+    enabled: true
+    external_name: cassandra
+    logging_dir: /var/log/cassandra
   logging_options:
     - files:
       - /var/log/cassandra/cassandra.log
       - /var/log/cassandra/system.log
       centralized_logging:
-        enabled: false
+        enabled: true
         format: json
       log_rotate:
       - daily
@@ -36,7 +40,7 @@ sub_service:
       - /var/log/cassandra/debug.log
       - /var/log/cassandra/gc.log.0.current
       centralized_logging:
-        enabled: false
+        enabled: true
         format: json
       log_rotate:
       - daily
@@ -45,4 +49,3 @@ sub_service:
       - missingok
       - compress
       - create 640 cassandra adm
-
