@@ -1,6 +1,6 @@
 #
 # (c) Copyright 2016 Hewlett Packard Enterprise Development LP
-# (c) Copyright 2017 SUSE LLC
+# (c) Copyright 2017-2018 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,11 +16,19 @@
 #
 ---
 
-- name: logging-server | stop-kibana | Check if Kibana site is enabled
+- name: logging-server | stop-kibana | Check if Kibana site is enabled (hlinux)
   become: yes
   stat:
     path: /etc/apache2/sites-enabled/kibana-apache2.conf
   register: kibana_site_file_result
+  when: ansible_os_famiily == 'Debian'
+
+- name: logging-server | stop-kibana | Check if Kibana site is enabled (SUSE)
+  become: yes
+  stat:
+    path: /etc/apache2/sites-enabled/kibana-apache2.conf
+  register: kibana_site_file_result
+  when: ansible_os_famiily == 'Suse'
 
 # Set the fact for restart based on ardana_notify
 - name: logging-server | stop-kibana | Set fact to stop based on ardana_notify_fact
@@ -29,9 +37,15 @@
   when: ardana_notify_kibana_restart is defined
         and ardana_notify_kibana_restart.changed
 
-- name:  logging-server | stop-kibana | Disable Kibana site
+- name:  logging-server | stop-kibana | Disable Kibana site (hlinux)
   become: yes
   command: a2dissite kibana-apache2
+  when: kibana_site_file_result.stat.exists
+
+- name:  logging-server | stop-kibana | Disable Kibana site (SUSE)
+  file:
+    state: absent
+    path: "{{ apache2_vhost_dir }}/kibana-apache2.conf"
   when: kibana_site_file_result.stat.exists
 
 - name:  logging-server | stop-kibana | Reload Apache

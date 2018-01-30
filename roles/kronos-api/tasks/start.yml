@@ -1,6 +1,6 @@
 #
 # (c) Copyright 2016 Hewlett Packard Enterprise Development LP
-# (c) Copyright 2017 SUSE LLC
+# (c) Copyright 2017-2018 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -26,11 +26,19 @@
     ardana_notify_kronos_api_install is defined
     and ardana_notify_kronos_api_install.changed
 
-- name: kronos-api | start | Check if Kronos site is enabled
+- name: kronos-api | start | Check if Kronos site is enabled (hlinux)
   become: yes
   stat:
     path: /etc/apache2/sites-enabled/kronos-apache2.conf
   register: kronos_site_file_result
+  when: ansible_os_family == 'Debian'
+
+- name: kronos-api | start | Check if Kronos site is enabled (SUSE)
+  become: yes
+  stat:
+    path: "{{ apache2_vhost_dir }}/kronos-apache2.conf"
+  register: kronos_site_file_result
+  when: ansible_os_family == 'Suse'
 
 # Set the fact for reload based on whether we are enabled
 - name: kronos-api | start | Set fact to start based on ardana_notify_fact
@@ -47,11 +55,19 @@
           ardana_notify_kronos_api_restart is defined
           and ardana_notify_kronos_api_restart.changed
 
-- name: kronos-api | start | Enable Kronos site
+- name: kronos-api | start | Enable Kronos site (hlinux)
   become: yes
   command: a2ensite kronos-apache2
   when: ( not kronos_site_file_result.stat.exists and
           ansible_os_family == 'Debian' )
+
+- name: kronos-api | start | Enable Kronos site (SUSE)
+  template:
+    src: kronose-modwsgi.conf.j2
+    dest: "{{ apache2_vhost_dir }}/kronos-modwsgi.conf"
+    mode: 0644
+  when: ( not kronos_site_file_result.stat.exists and
+          ansible_os_family == 'Suse' )
 
 - include: "{{ playbook_dir }}/roles/FND-AP2/tasks/start_reload.yml"
   vars:

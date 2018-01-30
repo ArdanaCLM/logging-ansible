@@ -1,6 +1,6 @@
 #
 # (c) Copyright 2016 Hewlett Packard Enterprise Development LP
-# (c) Copyright 2017 SUSE LLC
+# (c) Copyright 2017-2018 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,10 +16,16 @@
 #
 ---
 
-- name: kronos-api | stop | Check if Kronos site is enabled
+- name: kronos-api | stop | Check if Kronos site is enabled (hlinux)
   become: yes
   stat:
     path: /etc/apache2/sites-enabled/kronos-apache2.conf
+  register: kronos_site_file_result
+
+- name: kronos-api | stop | Check if Kronos site is enabled (SUSE)
+  become: yes
+  stat:
+    path: "{{ apache2_vhost_dir }}/kronos-apache2.conf"
   register: kronos_site_file_result
 
 # Set the fact for restart based on ardana_notify
@@ -31,10 +37,17 @@
     and ardana_notify_kronos_api_restart.changed
     or kronos_site_file_result.stat.exists
 
-- name: kronos-api | stop | Disable Kronos site if required
+- name: kronos-api | stop | Disable Kronos site if required (hlinux)
   become: yes
   command: a2dissite kronos-apache2
-  when: kronos_site_file_result.stat.exists
+  when: ( ansible_os_family == 'Debian' and kronos_site_file_result.stat.exists)
+
+- name: kronos-api | stop | Disable Kronos site if required (SUSE)
+  file:
+    state: absent
+    path: "{{ apache2_vhost_dir }}/kronos-apache2.conf"
+  when: ( ansible_os_family == 'Suse' and kronos_site_file_result.stat.exists)
+
 
 - name: kronos-api | stop | Reload Apache
   become: yes
