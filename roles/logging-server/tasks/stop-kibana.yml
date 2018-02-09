@@ -16,19 +16,11 @@
 #
 ---
 
-- name: logging-server | stop-kibana | Check if Kibana site is enabled (hlinux)
-  become: yes
-  stat:
-    path: /etc/apache2/sites-enabled/kibana-apache2.conf
-  register: kibana_site_file_result
-  when: ansible_os_famiily == 'Debian'
-
-- name: logging-server | stop-kibana | Check if Kibana site is enabled (SUSE)
-  become: yes
-  stat:
-    path: /etc/apache2/sites-enabled/kibana-apache2.conf
-  register: kibana_site_file_result
-  when: ansible_os_famiily == 'Suse'
+- name: logging-server | stop-kibana | Disable Kibana vhost
+  file:
+    state: absent
+    path: "{{ apache2_vhost_dir }}/kibana-apache2.conf"
+  register: ardana_notify_kibana_restart
 
 # Set the fact for restart based on ardana_notify
 - name: logging-server | stop-kibana | Set fact to stop based on ardana_notify_fact
@@ -37,22 +29,10 @@
   when: ardana_notify_kibana_restart is defined
         and ardana_notify_kibana_restart.changed
 
-- name:  logging-server | stop-kibana | Disable Kibana site (hlinux)
-  become: yes
-  command: a2dissite kibana-apache2
-  when: kibana_site_file_result.stat.exists
-
-- name:  logging-server | stop-kibana | Disable Kibana site (SUSE)
-  file:
-    state: absent
-    path: "{{ apache2_vhost_dir }}/kibana-apache2.conf"
-  when: kibana_site_file_result.stat.exists
-
 - name:  logging-server | stop-kibana | Reload Apache
   include: "{{ playbook_dir }}/roles/FND-AP2/tasks/start_reload.yml"
   vars:
-    apache_reload_requested: >-
-      "{{ kibana_reload_required and not kibana_site_file_result.stat.exists }}"
+    apache_reload_requested: "{{ kibana_reload_required }}"
 
 - name: logging-server | stop-kibana | Stop Kibana
   become: yes

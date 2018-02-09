@@ -40,22 +40,13 @@
   register: ardana_notify_kronos_api_restart
   when: ( 'MON_API' in verb_hosts )
 
-- name: kronos-api | configure | Configure Kronos/Apache virtualhost available
+- name: kronos-api | configure | Configure Kronos/Apache vhost
   become: yes
   template:
     src: kronos-apache2.conf.j2
-    dest: "{{ apache2_vhost_dir }}/kronos-apache2.conf"
+    dest: "{{ apache2_vhost_dir }}/kronos-apache2.vhost"
     mode: 0755
   register: ardana_notify_kronos_apache_reload
-
-- name: kronos-api | configure | Configure Kronos/Apache virtualhost enabled
-  become: yes
-  file:
-    src: "{{ apache2_vhost_dir }}/kronos-apache2.conf"
-    dest: /etc/apache2/sites-enabled/kronos-apache2.conf
-    state: link
-  register: ardana_notify_kronos_apache_reload
-  when: ansible_os_family == 'Debian'
 
 - name: kronos-api | configure | Configure Kronos/Apache log file ownership
   become: yes

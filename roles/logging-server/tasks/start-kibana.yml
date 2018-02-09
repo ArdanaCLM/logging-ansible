@@ -48,40 +48,13 @@
     kronos_apache_started: true
   when: kronos_is_apache_up_result | failed
 
-# Check if kibana site is enabled
-- name: logging-server | start-kibana | Check if Kibana site is enabled (hlinux)
+- name:  logging-server | start-kibana | Enable Kibana vhost
   become: yes
-  stat:
-    path: /etc/apache2/sites-enabled/kibana-apache2.conf
-  register: kibana_site_file_result
-
-- name: logging-server | start-kibana | Check if Kibana site is enabled (SUSE)
-  become: yes
-  stat:
-    path: "{{ apache2_vhost_dir }}/kibana-apache2.conf"
-  register: kibana_site_file_result
-
-# Set the fact for reload based on whether kibana site is enabled
-- name: logging-server | start-kibana | Set fact to start based on site enabled check
-  set_fact:
-    kibana_reload_required : True
-  when: not kibana_site_file_result.stat.exists
-
-# Enable kibana site
-- name:  logging-server | start-kibana | Enable Kibana site (hlinux)
-  become: yes
-  command: a2ensite kibana-apache2
-  when: ( not kibana_site_file_result.stat.exists and
-          ansible_os_family == 'Debian')
-
-- name:  logging-server | start-kibana | Enable Kibana site (SUSE)
-  become: yes
-  template:
-    src: kibana-apache2.conf.j2
+  file:
+    src: "{{ apache2_vhost_dir }}/kibana-apache2.vhost"
     dest: "{{ apache2_vhost_dir }}/kibana-apache2.conf"
-    mode: 0644
-  when: ( not kibana_site_file_result.stat.exists and
-          ansible_os_family == 'Suse')
+    state: link
+  register: ardana_notify_kibana_restart
 
 # Ensure Apache is reloaded via Apache owned playbook
 - include: "{{ playbook_dir }}/roles/FND-AP2/tasks/start_reload.yml"
@@ -91,8 +64,7 @@
       "{{ (ardana_notify_kibana_restart is defined
       and ardana_notify_kibana_restart.changed)
       or (ardana_notify_kronos_pwd_change is defined
-      and ardana_notify_kronos_pwd_change.changed)
-      or kibana_reload_required }}"
+      and ardana_notify_kronos_pwd_change.changed) }}"
     apache_restart_requested:
       "{{ ardana_notify_kronos_conf_change is defined
        and ardana_notify_kronos_conf_change.changed
