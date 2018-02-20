@@ -62,13 +62,12 @@
     cache: update
   when: deployer_media_legacy_layout|bool
 
-- name: logging-server | install | Install logging server components in SLES
+- name: logging-server | install | Install logging server components
   become: yes
-  zypper:
+  package:
     name: "{{ item }}"
-    state: present
+    state: latest
   with_items: logging_server_component_packages
-  when: ansible_os_family | lower == 'suse'
 
 # Installing Elasticsearch
 #------------------------------------------------------------------------------
@@ -338,43 +337,13 @@
     ardana_notify_kibana_install is defined and
     ardana_notify_kibana_install.changed
 
-- name: logging-server | install | Check elasticsearch service enabled
-  become: yes
-  stat:
-    path: "/etc/systemd/system/multi-user.target.wants/elasticsearch.service"
-  register: es_enabled_result
-
-- name: logging-server | install | Configure Elasticsearch to start on boot
+- name: logging-server | install | Enable ELK to start on boot
   become: yes
   service:
-    name: elasticsearch
+    name: "{{ item }}"
     enabled: yes
-  when: not es_enabled_result.stat.exists
   register: ardana_notify_elasticsearch_restart
-
-- name: logging-server | install | Check Logstash service enabled
-  become: yes
-  stat:
-    path: "/etc/systemd/system/multi-user.target.wants/logstash.service"
-  register: ls_enabled_result
-
-- name: logging-server | install | Configure Logstash to start on boot
-  become: yes
-  service:
-    name: logstash
-    enabled: yes
-  when: not ls_enabled_result.stat.exists
-  register: ardana_notify_logstash_restart
-
-- name: logging-server | install | Check Kibana service enabled
-  become: yes
-  stat:
-    path: "/etc/systemd/system/multi-user.target.wants/kibana.service"
-  register: ks_enabled_result
-
-- name: logging-server | install | Configure Kibana to start on boot
-  become: yes
-  service:
-    name: kibana
-    enabled: yes
-  when: not ks_enabled_result.stat.exists
+  with_items:
+    - elasticsearch
+    - logstash
+    - kibana
