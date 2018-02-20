@@ -80,3 +80,12 @@
     group: "{{ kronos_group }}"
     mode: 0755
     recurse: yes
+
+- name: kronos-api | install | Link log-api WSGI file
+  become: yes
+  file:
+    src: "{{ 'monasca' | venv_dir }}/bin/monasca-log-api-wsgi"
+    dest: "{{ kronos_wsgi_dir }}/monasca-log-api-wsgi"
+    state: link
+  when: not deployer_media_legacy_layout|bool
+

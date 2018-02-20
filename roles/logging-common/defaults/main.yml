@@ -283,7 +283,7 @@ kronos_user: kronos
 kronos_group: adm
 kronos_home_dir: /var/lib/kronos
 kronos_log_dir: /var/log/kronos
-kronos_wsgi_dir: /var/www/kronos
+kronos_wsgi_dir: "{{ www_root }}/kronos"
 
 kronos_api_log_file: kronos-api.log
 kronos_api_host: "{{ host.bind.LOG_API.internal.ip_address }}"
