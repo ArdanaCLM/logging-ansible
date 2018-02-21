@@ -1,6 +1,6 @@
 #
 # (c) Copyright 2015-2017 Hewlett Packard Enterprise Development LP
-# (c) Copyright 2017 SUSE LLC
+# (c) Copyright 2017-2018 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,6 +15,9 @@
 # under the License.
 #
 ---
+freezer_log_user: "{{ 'root' if deployer_media_legacy_layout|bool else 'freezer' }}"
+freezer_log_group: "{{ 'adm' if deployer_media_legacy_layout|bool else 'freezer' }}"
+
 sub_service:
   hosts: FRE-AGN
   name: freezer-agent
@@ -24,20 +27,6 @@ sub_service:
     external_name: backup
     logging_dir: /var/log/freezer-agent
   logging_options:
-    - files:
-      - /var/log/freezer-agent/freezer-agent.log
-      - /var/log/freezer-agent/freezer-scheduler.log
-      centralized_logging:
-        enabled: false
-        format: json
-      log_rotate:
-      - daily
-      - compress
-      - missingok
-      - copytruncate
-      - maxsize 80M
-      - rotate 14
-      - create 640 root adm
     - files:
       - /var/log/freezer-agent/freezer-agent-json.log
       - /var/log/freezer-agent/freezer-scheduler-json.log
@@ -51,4 +40,4 @@ sub_service:
       - copytruncate
       - maxsize 80M
       - rotate 14
-      - create 640 root adm
+      - create 640 "{{ freezer_log_user }} {{ freezer_log_group }}"
