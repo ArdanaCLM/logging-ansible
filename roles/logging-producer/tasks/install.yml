@@ -20,7 +20,7 @@
 
 - name: logging-producer | install | Install Beaver from rpm (SUSE)
   become: yes
-  zypper:
+  package:
     name: python-Beaver
     state: present
   when: not deployer_media_legacy_layout|bool
