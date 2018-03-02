@@ -21,6 +21,7 @@
   file:
     state: absent
     path: "{{ apache2_vhost_dir }}/kibana-apache2.conf"
+  become: yes
   register: ardana_notify_kibana_restart
 
 # Set the fact for restart based on ardana_notify
