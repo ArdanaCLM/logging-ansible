@@ -31,7 +31,7 @@ sub_service:
       - maxsize 200M
       - missingok
       - compress
-      - create 640 cassandra admin
+      - create 640 cassandra adm
     - files:
       - /var/log/cassandra/debug.log
       - /var/log/cassandra/gc.log.0.current
@@ -44,5 +44,5 @@ sub_service:
       - maxsize 200M
       - missingok
       - compress
-      - create 640 cassandra admin
+      - create 640 cassandra adm
 

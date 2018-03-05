@@ -40,4 +40,4 @@ sub_service:
       - copytruncate
       - maxsize 80M
       - rotate 14
-      - create 640 "{{ freezer_log_user }} {{ freezer_log_group }}"
+      - su root root

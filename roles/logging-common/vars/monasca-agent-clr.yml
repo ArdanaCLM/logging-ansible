@@ -39,5 +39,4 @@ sub_service:
       - copytruncate
       - maxsize 45M
       - rotate 5
-      - create 640 monasca-agent monasca
-
+      - create 640 monasca-agent monasca-agent
