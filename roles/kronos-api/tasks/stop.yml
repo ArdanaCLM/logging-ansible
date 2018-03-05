@@ -17,6 +17,7 @@
 ---
 
 - name: kronos-api | stop | Disable Kronos site if required
+  become: yes
   file:
     state: absent
     path: "{{ apache2_vhost_dir }}/kronos-apache2.conf"

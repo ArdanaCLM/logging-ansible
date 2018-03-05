@@ -17,6 +17,7 @@
 ---
 
 - name: logging-server | stop-kibana | Disable Kibana vhost
+  become: yes
   file:
     state: absent
     path: "{{ apache2_vhost_dir }}/kibana-apache2.conf"
