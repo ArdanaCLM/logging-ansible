@@ -31,3 +31,23 @@
     name: Beaver
     enabled: yes
   when: not deployer_media_legacy_layout|bool
+
+# add other permissions to allow read access to configuration files
+- name: logging-producer | install | Modify Beaver conf directory
+  become: yes
+  file:
+    path: "{{ beaver_conf_dir }}/conf.d"
+    state: directory
+    mode: o+rx
+  register: ardana_notify_beaver_restart
+  when: not deployer_media_legacy_layout|bool
+
+# append group to allow read access to most service logs
+- name: logging-producer | install | Modify Beaver user
+  become: yes
+  user:
+    name: "{{ beaver_user }}"
+    group: "{{ beaver_group }}"
+    append: yes
+  register: ardana_notify_beaver_restart
+  when: not deployer_media_legacy_layout|bool
