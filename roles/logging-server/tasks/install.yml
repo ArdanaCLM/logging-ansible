@@ -83,7 +83,7 @@
 
 - name: logging-server | install | Install Elasticsearch package (SUSE)
   become: yes
-  zypper:
+  package:
     name: elasticsearch
     state: present
   register: ardana_notify_elasticsearch_install
@@ -177,7 +177,7 @@
 
 - name: logging-server | install | Install Logstash rpm package (SUSE)
   become: yes
-  zypper:
+  package:
     name: logstash
     state: present
   register: ardana_notify_logstash_install
@@ -241,7 +241,7 @@
 
 - name: logging-server | install | Install Kibana rpm package (SUSE)
   become: yes
-  zypper:
+  package:
     name: kibana
     state: present
   register: ardana_notify_kibana_install
