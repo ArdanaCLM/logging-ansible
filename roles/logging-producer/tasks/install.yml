@@ -47,7 +47,7 @@
   become: yes
   user:
     name: "{{ beaver_user }}"
-    group: "{{ beaver_group }}"
+    groups: "{{ beaver_group }}"
     append: yes
   register: ardana_notify_beaver_restart
   when: not deployer_media_legacy_layout|bool
