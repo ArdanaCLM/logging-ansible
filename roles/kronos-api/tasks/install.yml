@@ -49,8 +49,17 @@
     shell: /usr/sbin/nologin
     system: yes
     createhome: no
-    home: /tmp
+    home: "{{ kronos_home_dir }}"
   register: ardana_notify_kronos_api_restart
+
+- name: kronos-api | install | Create Kronos API user home
+  become: yes
+  file:
+    path: "{{ kronos_home_dir }}"
+    state: directory
+    owner: "{{ kronos_user }}"
+    group: "{{ kronos_group }}"
+    mode: 0700
 
 - name: kronos-api | install | Create Kronos API log directory
   become: yes

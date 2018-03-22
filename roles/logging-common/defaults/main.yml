@@ -281,6 +281,7 @@ kronos_api_admin_role: "service"
 #----------------------------------------------------------------------------------------
 kronos_user: kronos
 kronos_group: adm
+kronos_home_dir: /var/lib/kronos
 kronos_log_dir: /var/log/kronos
 kronos_wsgi_dir: /var/www/kronos
 

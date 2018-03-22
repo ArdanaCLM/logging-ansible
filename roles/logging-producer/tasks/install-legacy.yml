@@ -47,8 +47,17 @@
     shell: /usr/sbin/nologin
     system: yes
     createhome: no
-    home: /tmp
+    home: "{{ beaver_home_dir }}"
   register: ardana_notify_beaver_restart
+
+- name: logging-producer | install | Create Beaver user home
+  become: yes
+  file:
+    path: "{{ beaver_home_dir }}"
+    state: directory
+    owner: "{{ beaver_user }}"
+    group: "{{ beaver_group }}"
+    mode: 0700
 
 - name: logging-producer | install | Install Beaver log directory
   become: yes
@@ -103,4 +112,13 @@
     group: "{{ kronos_group }}"
     shell: /usr/sbin/nologin
     createhome: no
-    home: /tmp
+    home: "{{ kronos_home_dir }}"
+
+- name: logging-producer | install | Create Kronos user home
+  become: yes
+  file:
+    path: "{{ kronos_home_dir }}"
+    state: directory
+    owner: "{{ kronos_user }}"
+    group: "{{ kronos_group }}"
+    mode: 0700
