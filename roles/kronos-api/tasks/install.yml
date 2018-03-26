@@ -35,7 +35,7 @@
 
 - name: kronos-api | install | Install Kronos rpm (SUSE)
   become: yes
-  zypper:
+  package:
     name: openstack-monasca-log-api
     state: present
   register: ardana_notify_kronos_api_install
