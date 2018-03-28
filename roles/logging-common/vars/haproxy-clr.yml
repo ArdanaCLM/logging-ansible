@@ -1,6 +1,5 @@
 #
-# (c) Copyright 2015-2017 Hewlett Packard Enterprise Development LP
-# (c) Copyright 2017-2018 SUSE LLC
+# (c) Copyright 2018 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,23 +15,20 @@
 #
 ---
 sub_service:
-  # FND-AP2 installed on:
-  #   deployer (aka ARD-SVC) by deployer-init.yml
-  #   FND-AP2 by FND-AP2-deploy.yml
-  hosts: ARD-SVC:FND-CLU
-  name: shibboleth-www
-  service: keystone
+  hosts: FND-CLU
+  name: haproxy
+  service: foundation
   logging_options:
     - files:
-      - /var/log/shibboleth-www/native.log
-      - /var/log/shibboleth-www/native_warn.log
+      - /var/log/haproxy.log
       centralized_logging:
         enabled: false
         format: json
       log_rotate:
-      - maxsize 45M
-      - rotate 7
+      - daily
       - compress
       - missingok
       - copytruncate
-      - create 640 shibd adm
+      - maxsize 45M
+      - rotate 7
+      - su root root
