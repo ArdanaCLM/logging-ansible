@@ -310,7 +310,7 @@ kronos_api_middleware_agent_roles: "monasca-agent, admin"
 kronos_api_middleware_default_roles: "{{ kronos_monitoring_role }}"
 keystone_admin_project_domain: "Default"
 keystone_admin_user_domain: "Default"
-system_cacert_file: "/etc/ssl/certs/ca-certificates.crt"
+system_cacert_file: "{{ trusted_ca_bundle }}"
 
 # Log Monitoring
 #--------------------------------------------------------------------------------
