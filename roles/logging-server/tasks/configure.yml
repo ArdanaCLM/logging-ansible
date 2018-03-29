@@ -161,7 +161,7 @@
     src: kibana-apache2.conf.j2
     dest: "{{ apache2_vhost_dir }}/kibana-apache2.vhost"
     mode: 0644
-  register: ardana_notify_kronos_conf_change
+  register: ardana_notify_kibana_apache_restart
 
 - name: logging-server | configure | Create Kibana log file
   become: yes

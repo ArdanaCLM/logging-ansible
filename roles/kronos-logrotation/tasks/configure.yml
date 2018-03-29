@@ -26,7 +26,7 @@
   become: yes
   package:
     name: "{{ item }}"
-    state: latest
+    state: present
   with_items: kronos_logrotation_dependencies
 
 # Configure logging for the implicated services

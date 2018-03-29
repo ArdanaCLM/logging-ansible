@@ -66,8 +66,8 @@
       or (ardana_notify_kronos_pwd_change is defined
       and ardana_notify_kronos_pwd_change.changed) }}"
     apache_restart_requested:
-      "{{ ardana_notify_kronos_conf_change is defined
-       and ardana_notify_kronos_conf_change.changed
+      "{{ ardana_notify_kibana_apache_restart is defined
+       and ardana_notify_kibana_apache_restart.changed
        or kibana_restart_required }}"
 
 # Prime Kibana if required
