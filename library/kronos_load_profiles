@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
 # (c) Copyright 2016,2017 Hewlett Packard Enterprise Development LP
-# (c) Copyright 2017 SUSE LLC
+# (c) Copyright 2017-2018 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -51,12 +51,18 @@ def main():
                     uf_profiles[os.path.basename(filename)] = profile
 
         for key, profile in uf_profiles.iteritems():
-            hosts = profile['hosts']
+            group_regexps = profile['hosts'].split(':')
 
-            # Filter possible hosts down to only those that are active
+            # Filter possible host groups down to only those that are active
             # e.g. LOG-SVR matches LOG-SVR-ccp
-            for group in [x for x in params.hosts.values() if re.search(hosts, x)]:
+            matched_groups = []
+            for group in params.hosts.values():
+                for group_regexp in group_regexps:
+                    if re.search(group_regexp, group):
+                        matched_groups.append(group)
+                        break
 
+            for group in matched_groups:
                 # Map into groups to get list of hosts to match against
                 if group in params.groups and params.host in params.groups[group]:
                     profiles[key] = profile
