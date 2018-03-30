@@ -1,6 +1,6 @@
 #
 # (c) Copyright 2016,2017 Hewlett Packard Enterprise Development LP
-# (c) Copyright 2017 SUSE LLC
+# (c) Copyright 2017-2018 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -144,14 +144,23 @@
 
 # Configure logging
 #-------------------------------------------------------------------------------
-- name: kronos-logrotation | install | Create Kronos user
+- name: kronos-logrotation | configure | Create Kronos user
   become: yes
   user:
     name: "{{ kronos_user }}"
     group: "{{ kronos_group }}"
     shell: /usr/sbin/nologin
     createhome: no
-    home: /tmp
+    home: "{{ kronos_home_dir }}"
+
+- name: kronos-logrotation | configure | Create Kronos user home
+  become: yes
+  file:
+    path: "{{ kronos_home_dir }}"
+    state: directory
+    owner: "{{ kronos_user }}"
+    group: "{{ kronos_group }}"
+    mode: 0700
 
 - name: kronos-logrotation | configure | Create log directory
   become: yes

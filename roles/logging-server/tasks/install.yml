@@ -29,6 +29,16 @@
     group: "{{ kronos_group }}"
     shell: /usr/sbin/nologin
     createhome: no
+    home: "{{ kronos_home_dir }}"
+
+- name: logging-server | install | Create Kronos user home
+  become: yes
+  file:
+    path: "{{ kronos_home_dir }}"
+    state: directory
+    owner: "{{ kronos_user }}"
+    group: "{{ kronos_group }}"
+    mode: 0700
 
 - name: logging-server | install | Install OS specific required packages
   become: yes
