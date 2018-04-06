@@ -24,7 +24,8 @@ sub_service:
     logging_dir: /var/log/cassandra
   logging_options:
     - files:
-      - /var/log/cassandra/cassandra.log
+      - /var/log/cassandra/debug.log
+      - /var/log/cassandra/gc.log
       - /var/log/cassandra/system.log
       centralized_logging:
         enabled: true
@@ -35,17 +36,4 @@ sub_service:
       - maxsize 200M
       - missingok
       - compress
-      - create 640 cassandra adm
-    - files:
-      - /var/log/cassandra/debug.log
-      - /var/log/cassandra/gc.log.0.current
-      centralized_logging:
-        enabled: true
-        format: json
-      log_rotate:
-      - daily
-      - rotate 5
-      - maxsize 200M
-      - missingok
-      - compress
-      - create 640 cassandra adm
+      - copytruncate
