@@ -82,51 +82,6 @@
     state: present
   register: ardana_notify_elasticsearch_install
 
-- name: logging-server | install | Set Elasticsearch venv varibles
-  become: yes
-  set_fact:
-    elasticsearch_install: true
-    elasticsearch_pkg_dir: "{{ ardana_notify_elasticsearch_install.name|\
-      jar_dir(ardana_notify_elasticsearch_install.version) }}"
-  when: >-
-    (ansible_os_family | lower == 'debian') and
-    not ardana_notify_elasticsearch_install is not defined and
-    ardana_notify_elasticsearch_install.changed
-
-- name: logging-server | install | Register new Elasticsearch version
-  become: yes
-  shell: >-
-    basename `ls -1 {{ elasticsearch_pkg_dir }}/*.deb` |
-    sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
-  register: elasticsearch_new_ver_result
-  when: (ansible_os_family | lower == 'debian') and elasticsearch_install is defined
-
-- name: logging-server | install | Register Elasticsearch current version
-  become: yes
-  shell: >-
-    dpkg -l | grep " elasticsearch " | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
-  register: elasticsearch_ver_result
-  when: (ansible_os_family | lower == 'debian') and elasticsearch_install is defined
-
-- name: logging-server | install | Register new Elasticsearch pkg path
-  become: yes
-  shell: basename `ls -1 {{ elasticsearch_pkg_dir }}/*.deb`
-  register: elasticsearch_pkg_result
-  when: (ansible_os_family | lower == 'debian') and elasticsearch_install is defined
-
-- name: logging-server | install | Install Elasticsearch pkg
-  become: yes
-  shell: >-
-    dpkg --force-confnew -i
-    {{ elasticsearch_pkg_dir }}/{{ elasticsearch_pkg_result.stdout }}
-  when: >-
-    (ansible_os_family | lower == 'debian') and
-    ardana_notify_elasticsearch_install is defined and
-    ardana_notify_elasticsearch_install.changed or
-    elasticsearch_ver_result.stdout != elasticsearch_new_ver_result.stdout
-  register: ardana_notify_elasticsearch_restart
-
-
 - name: logging-server | install | Ensure elasticsearch has permissions
   become: yes
   file:
@@ -165,49 +120,6 @@
     state: present
   register: ardana_notify_logstash_install
 
-- name: logging-server | install | Set Logstash venv varibles
-  become: yes
-  set_fact:
-    logstash_install: true
-    logstash_pkg_dir: "{{ ardana_notify_logstash_install.name|\
-      jar_dir(ardana_notify_logstash_install.version) }}"
-  when: >-
-    (ansible_os_family | lower == 'debian') and
-    not ardana_notify_logstash_install is not defined and
-    ardana_notify_logstash_install.changed
-
-- name: logging-server | install | Register new Logstash version
-  become: yes
-  shell: >-
-    basename `ls -1 {{ logstash_pkg_dir }}/*.deb` |
-    sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
-  register: logstash_new_ver_result
-  when: (ansible_os_family | lower == 'debian') and logstash_install is defined
-
-- name: logging-server | install | Register Logstash current installed version
-  become: yes
-  shell: dpkg -l | grep " logstash " | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
-  register: logstash_ver_result
-  when: (ansible_os_family | lower == 'debian') and logstash_install is defined
-
-- name: logging-server | install | Register new Logstash pkg path
-  become: yes
-  shell: basename `ls -1 {{ logstash_pkg_dir }}/*.deb`
-  register: logstash_pkg_result
-  when: (ansible_os_family | lower == 'debian') and logstash_install is defined
-
-- name: logging-server | install | Install Logstash pkg
-  become: yes
-  shell: >-
-    dpkg --force-confnew -i
-    {{ logstash_pkg_dir }}/{{ logstash_pkg_result.stdout }}
-  when: >-
-    (ansible_os_family | lower == 'debian') and
-    ardana_notify_logstash_install is defined and
-    ardana_notify_logstash_install.changed or
-    logstash_ver_result.stdout != logstash_new_ver_result.stdout
-  register: ardana_notify_logstash_restart
-
 # Installing Kibana
 #------------------------------------------------------------------------------
 - name: logging-server | install | Install Kibana rpm package (SUSE)
@@ -216,48 +128,6 @@
     name: kibana
     state: present
   register: ardana_notify_kibana_install
-
-- name: logging-server | install | Set Kibana venv varibles
-  become: yes
-  set_fact:
-    kibana_install: true
-    kibana_pkg_dir: "{{ ardana_notify_kibana_install.name|\
-      jar_dir(ardana_notify_kibana_install.version) }}"
-  when: >-
-    (ansible_os_family | lower == 'debian') and
-    not ardana_notify_kibana_install is not defined and
-    ardana_notify_kibana_install.changed
-
-- name: logging-server | install | Register new Kibana version
-  become: yes
-  shell: >-
-    basename `ls -1 {{ kibana_pkg_dir }}/*.deb` |
-    sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
-  register: kibana_new_ver_result
-  when: (ansible_os_family | lower == 'debian') and kibana_install is defined
-
-- name: logging-server | install | Register Kibana current version
-  become: yes
-  shell: dpkg -l | grep " kibana " | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/"
-  register: kibana_ver_result
-  when: (ansible_os_family | lower == 'debian') and kibana_install is defined
-
-- name: logging-server | install | Register new Kibana pkg path
-  become: yes
-  shell: basename `ls -1 {{ kibana_pkg_dir }}/*.deb`
-  register: kibana_pkg_result
-  when: (ansible_os_family | lower == 'debian') and kibana_install is defined
-
-- name: logging-server | install | Install Kibana pkg
-  become: yes
-  shell: >-
-    dpkg --force-confnew -i {{ kibana_pkg_dir }}/{{ kibana_pkg_result.stdout }}
-  when: >-
-    (ansible_os_family | lower == 'debian') and
-    ardana_notify_kibana_install is defined and
-    ardana_notify_kibana_install.changed or
-    kibana_ver_result.stdout != kibana_new_ver_result.stdout
-  register: ardana_notify_kibana_restart
 
 - name: logging-server | install | Create /var/log/kibana directory
   become: yes
