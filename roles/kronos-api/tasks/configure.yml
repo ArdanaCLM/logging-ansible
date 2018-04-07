@@ -70,3 +70,10 @@
     - wsgi-access.log
     - wsgi.log
     - "{{ kronos_api_log_file }}"
+
+- name: kronos-api | configure | Configure Monasca-Log log directory access
+  become: yes
+  file:
+    path: /var/log/monasca
+    state: directory
+    mode: o+rx
