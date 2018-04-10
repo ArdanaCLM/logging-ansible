@@ -57,23 +57,6 @@
     rotation_config: "{{ logging_profiles.rotation_config }}"
     usable_log_percent: "{{ var_log_high_watermark_percent }}"
 
-# Configure Logrotate
-#-------------------------------------------------------------------------------
-- name: >-
-    kronos-logrotation | configure | Install
-    default logrotate.conf file
-  become: yes
-  copy:
-    src: logrotate.conf
-    dest: /etc/logrotate.conf
-    mode: 0644
-
-- name: kronos-logrotation | configure | Cancel automatic logrotate schedule
-  become: yes
-  file:
-    path: /etc/cron.daily/logrotate
-    state: absent
-
 # Configure Audit Logrotate
 #-------------------------------------------------------------------------------
 - name: >-
