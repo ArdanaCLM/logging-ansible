@@ -1,0 +1,48 @@
+#
+# (c) Copyright 2018 SUSE LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+---
+- name: logging-server | _schedule_restart | Schedule a restart for rsyslog
+  debug:
+    msg: "Trigger a change notification in rsyslog"
+  changed_when: true
+  register: ardana_notify_rsyslog_restart
+
+- name: logging-server | _schedule_restart | Schedule a restart for logstash
+  debug:
+    msg: "Trigger a change notification in logstash"
+  changed_when: true
+  register: ardana_notify_logstash_restart
+
+- name: logging-server | _schedule_restart |
+    Schedule a restart for elastisearch
+  debug:
+    msg: "Trigger a change notification in elasticsearch"
+  changed_when: true
+  register: ardana_notify_elasticsearch_restart
+
+- name: logging-server | _schedule_restart |
+    Schedule a restart for kibana
+  debug:
+    msg: "Trigger a change notification in kibana"
+  changed_when: true
+  register: ardana_notify_kibana_restart
+
+- name: logging-server | _schedule_restart |
+    Schedule a restart for apache
+  debug:
+    msg: "Trigger a change notification in apache"
+  changed_when: true
+  register: ardana_notify_kibana_apache_restart
