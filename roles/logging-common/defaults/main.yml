@@ -189,11 +189,10 @@ logstash_flush_size: 2000
 curator_enable: "{{ LOG_SVR | item('vars.curator_enable', default=True) }}"
 curator_es_hostname: "{{ elasticsearch_http_host }}"
 curator_es_port: "{{ elasticsearch_http_port }}"
-curator_bin_path: /usr/bin/curator
+curator_bin_path: /usr/bin/curator_cli
 curator_indices_regex: ^logstash-.*$
 curator_num_of_indices_to_keep: "{{ LOG_SVR | item('vars.curator_num_of_indices_to_keep', default=7) }}"
 curator_log_path: /var/log/elasticsearch/curator.log
-curator_disable_bloom_filter_days: "{{ LOG_SVR | item('vars.curator_disable_bloom_filter_days', default=0) }}"
 curator_close_indices_after_days: "{{ LOG_SVR | item('vars.curator_close_indices_after_days', default=0) }}"
 
 # ES backup settings

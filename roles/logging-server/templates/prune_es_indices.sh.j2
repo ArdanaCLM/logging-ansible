@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # (c) Copyright 2015-2016 Hewlett Packard Enterprise Development LP
-# (c) Copyright 2017 SUSE LLC
+# (c) Copyright 2017-2018 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -19,6 +19,7 @@
 # It has to be stored under /etc/cron.daily or /etc/cron.weekly
 
 logfile={{ curator_log_path }}
+configfile=/etc/elasticsearch/curator.yml
 dt="$(date +"%Y-%m-%d %H:%M:%S")\t\t"
 
 es_log_partition={{ curator_es_partition }}
@@ -28,6 +29,10 @@ es_backup_enabled={% if curator_enable_backup %}true
 es_backup_partition={{ curator_es_backup_partition }}
 es_repo_name="{{ curator_backup_repo_name }}"
 backup_done=false
+
+curator_options="--config $configfile"
+curator_filter_list_json='[{"filtertype":"pattern","kind":"regex","value":"^logstash-.*$"},{"filtertype":"age","source":"name","direction":"older","timestring":"%Y.%m.%d","unit":"days","unit_count":UNIT_COUNT}]'
+curator_filter_list="--ignore_empty_list --filter_list $curator_filter_list_json"
 
 # function to find the current used size of the ES parition
 function get_current_es_partition_size()
@@ -50,13 +55,13 @@ function backup_es_indices()
   # check if backup is enabled
   if [ $es_backup_enabled == true ]; then
     echo -e "$dt Beginning backup of Elasticsearch indices..." >> $logfile
-    repo_already_exists=$(es_repo_mgr --host {{ curator_es_hostname }} --port {{ curator_es_port }} show | grep -c $es_repo_name)
+    repo_already_exists=$(es_repo_mgr $curator_options show | grep -c $es_repo_name)
     if [ $repo_already_exists -eq 0 ]; then
       # create the repo
       echo -e "$dt Creating repository $es_repo_name ..." >> $logfile
-      es_repo_mgr --host {{ curator_es_hostname }} --port {{ curator_es_port }} --logfile {{ curator_log_path }} create fs --repository $es_repo_name --location $es_backup_partition
+      es_repo_mgr $curator_options create fs --repository $es_repo_name --location $es_backup_partition
     fi
-    curator --host {{ curator_es_hostname }} --port {{ curator_es_port }} --logfile {{ curator_log_path }} snapshot --repository $es_repo_name indices --prefix logstash
+    $bin_name $curator_options snapshot --repository $es_repo_name --ignore_empty_list --filter_list '[{"filtertype":"pattern","kind":"prefix","value":"logstash"}]'
     if [ $? -eq 0 ]; then
       backup_done=true
       echo -e "$dt Backup completed." >> $logfile
@@ -105,14 +110,14 @@ num_of_indices_to_keep={{ curator_num_of_indices_to_keep }}
 
 if [ $num_of_indices_to_keep -gt 0 ]; then
   # check if there are any old indices that needs to be pruned
-  no_pruning_required=$(curator --host {{ curator_es_hostname }} --port {{ curator_es_port }} --logfile {{ curator_log_path }} show indices --regex "{{ curator_indices_regex }}" --older-than $num_of_indices_to_keep --time-unit days --timestring "%Y.%m.%d" | grep -c "No indices matched provided args")
-  if [ $no_pruning_required -eq 0 ]; then
+  pruning_required=$($bin_name $curator_options show_indices ${curator_filter_list//UNIT_COUNT/$num_of_indices_to_keep} | wc -l)
+  if [ $pruning_required -ne 0 ]; then
     # backup the indices first
     backup_es_indices
   fi
 
   echo -e "$dt Running curator to delete indices older than $num_of_indices_to_keep days old..." >> $logfile
-  curator --host {{ curator_es_hostname }} --port {{ curator_es_port }} --logfile {{ curator_log_path }} delete indices --regex "{{ curator_indices_regex }}" --older-than $num_of_indices_to_keep --time-unit days --timestring "%Y.%m.%d"
+  $bin_name $curator_options delete_indices ${curator_filter_list//UNIT_COUNT/$num_of_indices_to_keep}
 fi
 
 for i in $(seq $num_of_indices_to_keep -1 1); do
@@ -121,7 +126,7 @@ for i in $(seq $num_of_indices_to_keep -1 1); do
   if [ $current_level -gt $high_watermark ]; then
     backup_es_indices
     echo -e "$dt $es_log_partition is still over $high_watermark%.  Keeping the $i most recent indices and deleting the others..." >> $logfile
-    curator --host {{ curator_es_hostname }} --port {{ curator_es_port }} --logfile {{ curator_log_path }} delete indices --regex "{{ curator_indices_regex }}" --older-than $i --time-unit days --timestring "%Y.%m.%d"
+    $bin_name $curator_options delete_indices ${curator_filter_list//UNIT_COUNT/$i}
   fi
 done
 
@@ -130,15 +135,8 @@ current_level=$(get_current_es_partition_size)
 if [ $current_level -gt $high_watermark ]; then
   echo -e "$dt ERROR: $es_log_partition is still over $high_watermark%.  Please consider increasing the partition size for {{ curator_es_partition }}" >> $logfile
 fi
-
-# next, disable bloom filter, if required
-disable_bloom_filter_days={{ curator_disable_bloom_filter_days | int }}
-if [ $disable_bloom_filter_days -gt 0 ]; then
-  curator --host {{ curator_es_hostname }} --port {{ curator_es_port }} --logfile {{ curator_log_path }} bloom indices --regex "{{ curator_indices_regex }}" --older-than {{ curator_disable_bloom_filter_days }} --time-unit days --timestring "%Y.%m.%d"
-fi
-
 # close indices, if required
 close_indices_after_days={{ curator_close_indices_after_days | int }}
 if [ $close_indices_after_days -gt 0 ]; then
-  curator --host {{ curator_es_hostname }} --port {{ curator_es_port }} --logfile {{ curator_log_path }} close indices --regex "{{ curator_indices_regex }}" --older-than {{ curator_close_indices_after_days }} --time-unit days --timestring "%Y.%m.%d"
+  $bin_name $curator_options close ${curator_filter_list//UNIT_COUNT/{{ curator_close_indices_after_days }}}
 fi

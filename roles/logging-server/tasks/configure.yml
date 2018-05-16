@@ -94,6 +94,13 @@
     - esutil.log
     - elasticsearch.log
 
+- name: logging-server | configure | Configure Elasticsearch Curator options
+  become: yes
+  template:
+    src: curator.yml.j2
+    dest: /etc/elasticsearch/curator.yml
+    mode: 0644
+
 # Configure Logstash
 #------------------------------------------------------------------------------
 - name: logging-server | configure | Configure Logstash
