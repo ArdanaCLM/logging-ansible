@@ -15,22 +15,17 @@
 #
 ---
 
-- include: install-legacy.yml
-  when: deployer_media_legacy_layout|bool
-
 - name: logging-producer | install | Install Beaver from rpm (SUSE)
   become: yes
   package:
     name: python-Beaver
     state: present
-  when: not deployer_media_legacy_layout|bool
 
 - name: logging-producer | install | Configure Beaver to start on boot
   become: yes
   service:
     name: Beaver
     enabled: yes
-  when: not deployer_media_legacy_layout|bool
 
 # add other permissions to allow read access to configuration files
 - name: logging-producer | install | Modify Beaver conf directory
@@ -40,7 +35,6 @@
     state: directory
     mode: o+rx
   register: ardana_notify_beaver_restart
-  when: not deployer_media_legacy_layout|bool
 
 # append group to allow read access to most service logs
 - name: logging-producer | install | Modify Beaver user
@@ -50,4 +44,3 @@
     groups: "{{ beaver_group }}"
     append: yes
   register: ardana_notify_beaver_restart
-  when: not deployer_media_legacy_layout|bool

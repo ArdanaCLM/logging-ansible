@@ -15,8 +15,8 @@
 # under the License.
 #
 ---
-freezer_log_user: "{{ 'root' if deployer_media_legacy_layout|bool else 'freezer' }}"
-freezer_log_group: "{{ 'adm' if deployer_media_legacy_layout|bool else 'freezer' }}"
+freezer_log_user: "freezer"
+freezer_log_group: "freezer"
 
 sub_service:
   hosts: FRE-AGN

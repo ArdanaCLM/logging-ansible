@@ -15,18 +15,6 @@
 # under the License.
 #
 ---
-- name: kronos-api | start | Activate Kronos API (legacy)
-  become: yes
-  install_package:
-    name: kronos
-    service: kronos
-    activate: act_on
-    version: "{{ ardana_notify_kronos_api_install.version }}"
-  when: >-
-    ardana_notify_kronos_api_install is defined
-    and ardana_notify_kronos_api_install.changed
-    and deployer_media_legacy_layout | bool
-
 - name: kronos-api | start | Enable Kronos vhost
   become: yes
   file:

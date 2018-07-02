@@ -40,22 +40,12 @@
   register: ardana_notify_kronos_api_restart
   when: ( 'MON_API' in verb_hosts )
 
-- name: kronos-api | configure | Configure Monasca-Log Apache vhost (legacy)
-  become: yes
-  template:
-    src: kronos-apache2.conf.j2
-    dest: "{{ apache2_vhost_dir }}/kronos-apache2.vhost"
-    mode: 0755
-  when: deployer_media_legacy_layout|bool
-  register: ardana_notify_kronos_apache_reload
-
 - name: kronos-api | configure | Configure Monasca-Log Apache vhost
   become: yes
   template:
     src: monasca-log-apache2.conf.j2
     dest: "{{ apache2_vhost_dir }}/kronos-apache2.vhost"
     mode: 0755
-  when: not deployer_media_legacy_layout|bool
   register: ardana_notify_kronos_apache_reload
 
 - name: kronos-api | configure | Configure Kronos/Apache log file ownership

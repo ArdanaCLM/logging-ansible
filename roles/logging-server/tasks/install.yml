@@ -66,12 +66,6 @@
     group: adm
     mode: 0755
 
-- name: logging-server | install | Update venv package cache
-  become: yes
-  install_package:
-    cache: update
-  when: deployer_media_legacy_layout|bool
-
 - name: logging-server | install | Install logging server components
   become: yes
   package:
@@ -81,23 +75,12 @@
 
 # Installing Elasticsearch
 #------------------------------------------------------------------------------
-- name: logging-server | install | Install Elasticsearch venv package (legacy)
-  become: yes
-  install_package:
-    name: elasticsearch_235
-    service: elasticsearch_235
-    state: present
-    activate: act_off
-  register: ardana_notify_elasticsearch_install
-  when: deployer_media_legacy_layout|bool
-
 - name: logging-server | install | Install Elasticsearch package (SUSE)
   become: yes
   package:
     name: elasticsearch
     state: present
   register: ardana_notify_elasticsearch_install
-  when: not deployer_media_legacy_layout|bool
 
 - name: logging-server | install | Set Elasticsearch venv varibles
   become: yes
@@ -175,23 +158,12 @@
 
 # Installing Logstash
 #------------------------------------------------------------------------------
-- name: logging-server | install | Install Logstash venv package (legacy)
-  become: yes
-  install_package:
-    name: logstash_232
-    service: logstash_232
-    state: present
-    activate: act_off
-  register: ardana_notify_logstash_install
-  when: deployer_media_legacy_layout|bool
-
 - name: logging-server | install | Install Logstash rpm package (SUSE)
   become: yes
   package:
     name: logstash
     state: present
   register: ardana_notify_logstash_install
-  when: not deployer_media_legacy_layout|bool
 
 - name: logging-server | install | Set Logstash venv varibles
   become: yes
@@ -238,24 +210,12 @@
 
 # Installing Kibana
 #------------------------------------------------------------------------------
-
-- name: logging-server | install | Install Kibana venv package (legacy)
-  become: yes
-  install_package:
-    name: kibana_450
-    service: kibana_450
-    state: present
-    activate: act_off
-  register: ardana_notify_kibana_install
-  when: deployer_media_legacy_layout|bool
-
 - name: logging-server | install | Install Kibana rpm package (SUSE)
   become: yes
   package:
     name: kibana
     state: present
   register: ardana_notify_kibana_install
-  when: not deployer_media_legacy_layout|bool
 
 - name: logging-server | install | Set Kibana venv varibles
   become: yes
@@ -308,34 +268,6 @@
     group: adm
     mode: 0755
 
-
-# Install systemd service units
-#------------------------------------------------------------------------------
-- name: logging-server | install | Install Kibana systemd unit file
-  become: yes
-  template:
-    src: "kibana.service.j2"
-    dest: "/etc/systemd/system/kibana.service"
-    mode: 0644
-  register: ardana_notify_kibana_restart
-  when: deployer_media_legacy_layout|bool
-
-- name: logging-server | install | Install Logstash systemd unit file
-  become: yes
-  template:
-    src: "logstash.service.j2"
-    dest: "/etc/systemd/system/logstash.service"
-    mode: 0644
-  register: ardana_notify_logstash_restart
-  when: deployer_media_legacy_layout|bool
-
-- name: logging-server | install | Install Elasticsearch systemd unit file
-  become: yes
-  template:
-    src: "elasticsearch.service.j2"
-    dest: "/etc/systemd/system/elasticsearch.service"
-    mode: 0644
-  when: deployer_media_legacy_layout|bool
 
 # Reload systemd and enable services
 #------------------------------------------------------------------------------
