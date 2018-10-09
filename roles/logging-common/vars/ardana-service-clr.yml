@@ -23,7 +23,6 @@ sub_service:
     - files:
       - /var/log/ardana_installer/installer-server.log
       - /var/log/ardana-service/ardana-service.log
-      - /var/log/ardana-service/logs/trigger.txt
       centralized_logging:
         enabled: false
         format: json
