@@ -19,4 +19,5 @@
 - name: kronos-api | status | Get logging Kronos API status
   uri:
     url: "{{ kronos_api_url }}"
+  ignore_errors: True
   when: "ardana_pre_upgrade_check is not defined and 'monasca-api' in group.services"
