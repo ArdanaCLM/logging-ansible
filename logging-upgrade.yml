@@ -16,9 +16,6 @@
 #
 ---
 
-# Stop other projects dependent on Elasticsearch
-- include: kronos-elasticsearch-stop-dependencies.yml
-
 # Stop the producers to avoid data coming in during upgrade
 - include: kronos-producer-stop.yml
 
@@ -45,6 +42,3 @@
 
 # Perform the actual upgrade
 - include: logging-deploy.yml
-
-# Start other projects dependent on Elasticserach
-- include: kronos-elasticsearch-start-dependencies.yml
