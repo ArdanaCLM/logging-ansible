@@ -197,7 +197,7 @@ def main():
 
     try:
         changed = False
-        os_family = platform.dist()[0].lower()
+        os_family = platform.dist()[0].lower().replace('centos', 'redhat')
         params = type('Params', (), module.params)
 
         # Set retention overrides if retention value is set in rotation config file
