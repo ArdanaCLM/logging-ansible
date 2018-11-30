@@ -21,7 +21,6 @@ sub_service:
   service: ardana-service
   logging_options:
     - files:
-      - /var/log/ardana_installer/installer-server.log
       - /var/log/ardana-service/ardana-service.log
       centralized_logging:
         enabled: false
