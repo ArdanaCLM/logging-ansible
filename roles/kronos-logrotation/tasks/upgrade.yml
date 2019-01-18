@@ -125,8 +125,6 @@
     /var/log/nova/nova-api-json.log*
     /var/log/nova/nova-cert.log*
     /var/log/nova/nova-cert-json.log*
-    /var/log/nova/nova-consoleauth.log*
-    /var/log/nova/nova-consoleauth-json.log*
     /var/log/nova/nova-conductor.log*
     /var/log/nova/nova-conductor-json.log*
     /var/log/nova/nova-scheduler.log*

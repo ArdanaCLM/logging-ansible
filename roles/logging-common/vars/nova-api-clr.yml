@@ -66,7 +66,6 @@ sub_service:
     - files:
       - /var/log/nova/nova-baremetal-deploy-helper.log
       - /var/log/nova/nova-cert.log
-      - /var/log/nova/nova-consoleauth.log
       - /var/log/nova/nova-novncproxy.log
       centralized_logging:
         enabled: false
@@ -82,7 +81,6 @@ sub_service:
     - files:
       - /var/log/nova/nova-baremetal-deploy-helper-json.log
       - /var/log/nova/nova-cert-json.log
-      - /var/log/nova/nova-consoleauth-json.log
       - /var/log/nova/nova-novncproxy-json.log
       centralized_logging:
         enabled: true
