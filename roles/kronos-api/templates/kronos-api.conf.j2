@@ -39,11 +39,14 @@ topics = {{ kronos_kafka_topic }}
 kafka_url = {{ kronos_kafka_hosts }}
 
 [keystone_authtoken]
-admin_user = {{ kronos_api_user }}
-admin_password = {{ kronos_api_password }}
-admin_tenant_name = {{ kronos_project }}
-identity_uri = {{ keystone_admin_identity_uri }}
-auth_uri = {{ keystone_admin_auth_uri }}
+username = {{ kronos_api_user }}
+password = {{ kronos_api_password }}
+project_name = {{ kronos_project }}
+project_domain_name = {{ kronos_api_domain }}
+user_domain_name = {{ kronos_api_domain }}
+auth_url = {{ keystone_admin_auth_uri }}/v3
+www_authenticate_uri = {{ keystone_admin_auth_uri }}
+auth_type = v3password
 cafile = {{ keystone_admin_authtoken_cafile }}
 certfile = {{ keystone_admin_authtoken_certfile }}
 keyfile = {{ keystone_admin_authtoken_keyfile }}
