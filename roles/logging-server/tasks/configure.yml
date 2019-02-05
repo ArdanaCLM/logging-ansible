@@ -43,9 +43,9 @@
 - name: logging-server | configure | Configure per topic segment rotation
   become: yes
   command: >-
-    {{ kafka_bin_dir }}/kafka-topics.sh --zookeeper {{ kronos_zookeeper_hosts }}
-    --topic {{ kronos_kafka_topic }} --alter
-    --config segment.ms={{ kafka_segment_minutes * 60 * 1000 }}
+    {{ kafka_bin_dir }}/kafka-configs.sh --zookeeper {{ kronos_zookeeper_hosts }}
+    --alter --entity-type topics --entity-name {{ kronos_kafka_topic }}
+    --add-config segment.ms={{ kafka_segment_minutes * 60 * 1000 }}
   run_once: true
 
 # Configure Elasticsearch
