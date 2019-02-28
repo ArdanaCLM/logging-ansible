@@ -16,8 +16,8 @@
 #
 ---
 sub_service:
-  hosts: KEYMGR-.*
-  name: barbican
+  hosts: KEYMGR-API
+  name: barbican-api
   service: barbican
   monitoring:
     enabled: true
@@ -27,7 +27,6 @@ sub_service:
     - files:
       - /var/log/barbican/barbican.log
       - /var/log/barbican/barbican-api.log
-      - /var/log/barbican/barbican-worker.log
       centralized_logging:
         enabled: false
         format: json
@@ -41,7 +40,6 @@ sub_service:
       - create 640 barbican adm
     - files:
       - /var/log/barbican/barbican-json.log
-      - /var/log/barbican/barbican-worker-json.log
       centralized_logging:
         enabled: true
         format: rawjson
