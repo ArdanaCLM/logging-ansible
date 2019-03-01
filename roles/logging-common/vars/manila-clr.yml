@@ -1,0 +1,82 @@
+#
+# (c) Copyright 2018 SUSE LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+---
+sub_service:
+  hosts: MNL-API
+  name: manila
+  service: manila
+  monitoring:
+    enabled: true
+    external_name: manila
+    logging_dir: /var/log/manila
+  logging_options:
+    - files:
+      - /var/log/manila/manila-api.log
+      centralized_logging:
+        enabled: false
+        format: json
+      log_rotate:
+      - daily
+      - compress
+      - delaycompress
+      - missingok
+      - copytruncate
+      - maxsize 100M
+      - rotate 7
+      - create 640 manila adm
+    - files:
+      - /var/log/manila/manila-api-json.log
+      centralized_logging:
+        enabled: true
+        format: rawjson
+      log_rotate:
+      - daily
+      - compress
+      - delaycompress
+      - missingok
+      - copytruncate
+      - maxsize 100M
+      - rotate 5
+      - create 640 manila adm
+    - files:
+      - /var/log/manila/manila-share.log
+      centralized_logging:
+        enabled: false
+        format: json
+      log_rotate:
+      - daily
+      - compress
+      - delaycompress
+      - missingok
+      - copytruncate
+      - maxsize 100M
+      - rotate 7
+      - create 640 manila adm
+    - files:
+      - /var/log/manila/manila-share-json.log
+      centralized_logging:
+        enabled: true
+        format: rawjson
+      log_rotate:
+      - daily
+      - compress
+      - delaycompress
+      - missingok
+      - copytruncate
+      - maxsize 100M
+      - rotate 5
+      - create 640 manila adm
+

@@ -89,6 +89,9 @@ kronos:
 logging:
     weight: 100
     retention: default
+manila:
+    weight: 100
+    retention: default
 magnum:
     weight: 100
     retention: default
