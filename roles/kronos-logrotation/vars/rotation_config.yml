@@ -101,7 +101,7 @@ monasca:
 crm:
     weight: 100
     retention: default
-mysql:
+mariadb:
     weight: 100
     retention: default
 neutron:

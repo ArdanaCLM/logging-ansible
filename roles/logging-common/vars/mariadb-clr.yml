@@ -17,7 +17,7 @@
 ---
 sub_service:
   hosts: FND-MDB
-  name: mysql
+  name: mariadb
   service: foundation
   logging_options:
     - files:
