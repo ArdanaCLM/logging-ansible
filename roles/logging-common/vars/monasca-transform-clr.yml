@@ -36,4 +36,4 @@ sub_service:
       - copytruncate
       - maxsize 370M
       - rotate 7
-      - create 640 monasca-transform adm
+      - create 666 monasca-transform adm
