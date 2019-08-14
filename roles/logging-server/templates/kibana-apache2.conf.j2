@@ -40,7 +40,7 @@ Listen {{ kibana_host }}:{{ kibana_port }}
     # Turn off forward proxies, only using reverse proxies
     ProxyRequests Off
 
-    <Proxy http://{{ kibana_internal_host }}:{{ kibana_internal_port }}>
+    <Proxy http://{{ kibana_internal_host | ipwrap }}:{{ kibana_internal_port }}>
         ProxySet connectiontimeout=5 timeout=90
     </Proxy>
     <Location />

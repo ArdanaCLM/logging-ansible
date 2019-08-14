@@ -287,7 +287,7 @@ kronos_wsgi_dir: "{{ www_root }}/kronos"
 kronos_api_log_file: kronos-api.log
 kronos_api_host: "{{ host.bind.LOG_API.internal.ip_address }}"
 kronos_api_port: "{{ host.bind.LOG_API.internal.port }}"
-kronos_api_url: "http://{{ kronos_api_host }}:{{ kronos_api_port }}/healthcheck"
+kronos_api_url: "http://{{ kronos_api_host | ipwrap }}:{{ kronos_api_port }}/healthcheck"
 kronos_api_workers: 1
 kronos_api_debug: False
 kronos_api_name: kronos

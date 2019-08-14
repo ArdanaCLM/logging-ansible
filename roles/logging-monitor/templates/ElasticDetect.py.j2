@@ -25,7 +25,7 @@ from monasca_setup.detection.utils import service_api_check
 
 log = logging.getLogger(__name__)
 
-ES_URL="http://{{ elasticsearch_http_host }}:{{ elasticsearch_http_port }}"
+ES_URL="http://{{ elasticsearch_http_host | ipwrap }}:{{ elasticsearch_http_port }}"
 PROCESS="elasticsearch"
 
 class ElasticDetect(monasca_setup.detection.Plugin):
