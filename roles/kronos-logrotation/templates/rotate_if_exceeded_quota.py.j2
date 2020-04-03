@@ -148,7 +148,7 @@ try:
 
     # Create Service objects
     with open(os.path.join(files.service_info), 'r') as f:
-        service_info = yaml.load(f)
+        service_info = yaml.load(f,Loader=yaml.FullLoader)
     services = {}
     for service_name, config in service_info.iteritems():
         services[service_name] = Service(service_name, config['quota'], config['files'], config['subservices'])
