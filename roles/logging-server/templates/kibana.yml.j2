@@ -29,6 +29,10 @@ server.host: "{{ kibana_internal_host }}"
 # The maximum payload size in bytes on incoming server requests.
 # server.maxPayloadBytes: 1048576
 
+# Set to sameorigin as a mitigation to CVE-2020-10743
+# Header names and values to send on all responses to the client from the Kibana server.
+server.customResponseHeaders: {"x-frame-options":"sameorigin"}
+
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.url: "http://{{ elasticsearch_http_host | ipwrap }}:{{ elasticsearch_http_port }}"
 
