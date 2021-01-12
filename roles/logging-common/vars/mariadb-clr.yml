@@ -21,10 +21,10 @@ sub_service:
   service: foundation
   logging_options:
     - files:
-      - /var/log/mysql.log
-      - /var/log/mysql.err
+      - /var/log/mysql/mysqld.log
+      - /var/log/mysql/mysql.err
       - /var/log/mysql/error.log
-      - /var/log/mysql/mysql-slow.log
+      - /var/log/mysql/mysql_slow.log
       centralized_logging:
         enabled: true
         format: json

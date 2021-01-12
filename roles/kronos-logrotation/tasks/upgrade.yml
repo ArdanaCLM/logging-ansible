@@ -72,10 +72,6 @@
     /var/log/monasca/api/request.log*
     /var/log/monasca/notification/notification.log*
     /var/log/monasca/persister/monasca-persister.log*
-    /var/log/monasca/agent/collector.log*
-    /var/log/monasca/agent/forwarder.log*
-    /var/log/monasca/agent/statsd.log*
-    /var/log/monasca/agent/supervisord.log*
     /var/log/keystone/keystone.log*
     /var/log/keystone/keystone-json.log*
     /var/log/keystone/keystone_access.log*
@@ -135,11 +131,6 @@
     /var/log/nova/nova-baremetal-deploy-helper-json.log*
     /var/log/nova/nova-compute.log*
     /var/log/nova/nova-compute-json.log*
-    /var/log/horizon/horizon_access.log*
-    /var/log/horizon/horizon_error.log*
-    /var/log/horizon/horizon-json.log*
-    /var/log/horizon/management/management.log*
-    /var/log/horizon/management/management-json.log*
     /var/log/designate/designate-api.log*
     /var/log/designate/designate-mdns.log*
     /var/log/designate/designate-central.log*
